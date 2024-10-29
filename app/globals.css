@@ -6,6 +6,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.transition-height {
+  transition: height 0.3s ease;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
