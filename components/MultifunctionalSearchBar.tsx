@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link, TextCursorInput, Loader2 } from "lucide-react";
+import { Search, Link, TextCursorInput, Loader2, Music2 } from "lucide-react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { lyricsApiRoot } from "@/constants/Constants";
 import { ScrollArea } from "./ui/scroll-area";
@@ -94,6 +94,7 @@ export default function MultifunctionalSearchBar() {
 
     if (isValidUrl(inputValue)) {
       console.log("URL: " + inputValue); // Open URL
+      router.push(`/import/article?url=${inputValue}`)
     } else if (inputValue.length > 100) {
       alert("Long text detected. Performing a long text analysis.");
       // Add custom action for long text
@@ -102,7 +103,8 @@ export default function MultifunctionalSearchBar() {
       console.log(`Searching for "${suggestion.title}"`);
       // Perform lyrics
     } else {
-      console.log("Search")
+      console.log("Search");
+      window.open(`https://duckduckgo.com/?start=1&q=${inputValue}&ia=web`);
       // perform search
     }
   };
@@ -120,7 +122,7 @@ export default function MultifunctionalSearchBar() {
   }
 
   const handleSuggestionSelect = (suggestion) => {
-    setInputValue(`${suggestion.title} - ${suggestion.artist.name}`)
+    // setInputValue(`${suggestion.title} - ${suggestion.artist.name}`)
     setShowSuggestions(false)
     // Perform your task here, e.g., play the song, navigate to a page, etc.
     console.log(`Selected: ${suggestion.title} by ${suggestion.artist.name}`)
@@ -189,7 +191,7 @@ export default function MultifunctionalSearchBar() {
                   onClick={() => handleSuggestionSelect(suggestion)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
-                  <Search className="mr-2 h-4 w-4" />
+                  <Music2 className="mr-2 h-4 w-4" />
                   <span>{suggestion.title} - {suggestion.artist.name}</span>
                 </div>
               ))

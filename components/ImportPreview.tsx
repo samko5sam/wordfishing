@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { lyricsApiRoot } from "@/constants/Constants";
 import { useRouter } from "next/navigation";
+import MultifunctionalSearchBar from "./MultifunctionalSearchBar";
 
 export const LyricsImportPreview = ({
   artist,
@@ -22,27 +23,35 @@ export const LyricsImportPreview = ({
   const [lyrics, setLyrics] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string|null>(null);
+  const [importing, setImporting] = useState(false);
 
   const decodedArtist = decodeURIComponent(artist?.toString()||"");
   const decodedSong = decodeURIComponent(song?.toString()||"");
 
   const handleImport = async () => {
+    setImporting(true);
     const redirectUrl = "/"; // Set this as needed
 
-    // Send a POST request to the importing page
-    const response = await fetch('/api/importLyrics', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ artist, song, lyrics }),
-    });
+    try {
+      // Send a POST request to the importing page
+      const response = await fetch('/api/importLyrics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ artist, song, lyrics }),
+      });
 
-    if (response.ok) {
-      // Redirect to the importing page
-      router.push(redirectUrl);
-    } else {
-      console.error("Failed to initiate import");
+      if (response.ok) {
+        // Redirect to the importing page
+        router.push(redirectUrl);
+      } else {
+        console.error("Failed to initiate import");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,7 +89,7 @@ export const LyricsImportPreview = ({
   }
 
   if (loading) return <p>歌詞載入中...</p>;
-  if (error) return <><h2 className="text-2xl">{error}</h2><BackToHomeBtn /></>;
+  if (error) return <><h2 className="text-2xl">{error}</h2><BackToHomeBtn /><MultifunctionalSearchBar /></>;
 
   return (
     <Card className="max-w-md p-4">
@@ -90,11 +99,11 @@ export const LyricsImportPreview = ({
           {decodedArtist} - {decodedSong}
         </h2>
       </CardHeader>
-      <CardContent className="max-h-[400px] overflow-y-auto">
-        <p className="whitespace-pre-wrap">{lyrics}</p>
+      <CardContent className="max-h-[400px] overflow-y-auto border rounded-xl mx-6">
+        <p className="whitespace-pre-wrap mt-4">{lyrics}</p>
       </CardContent>
       <CardFooter>
-        <Button size="lg" className="w-full mt-4" onClick={handleImport}>獲取歌詞</Button>
+        <Button size="lg" className="w-full mt-8" onClick={handleImport} disabled={importing}>{importing ? "正在匯入..." : "匯入歌詞"}</Button>
       </CardFooter>
     </Card>
   );
