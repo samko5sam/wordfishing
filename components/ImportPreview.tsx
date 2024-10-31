@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import MultifunctionalSearchBar from "./MultifunctionalSearchBar";
 import { db } from "@/lib/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 export const LyricsImportPreview = ({
   artist,
@@ -24,6 +24,7 @@ export const LyricsImportPreview = ({
 }) => {
   const router = useRouter();
   const { userId } = useAuth();
+  const clerk = useClerk();
   const [lyrics, setLyrics] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string|null>(null);
@@ -71,6 +72,9 @@ export const LyricsImportPreview = ({
   };
 
   useEffect(() => {
+    if (!userId) {
+      clerk.redirectToSignIn();
+    }
     if (!artist || !song) return;
 
     const fetchLyrics = async () => {

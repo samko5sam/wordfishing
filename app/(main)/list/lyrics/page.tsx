@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useClerk } from '@clerk/nextjs';
 import { db } from '@/lib/firebase';
 import Link from 'next/link';
 
@@ -18,6 +18,7 @@ interface Lyrics {
 
 export default function LyricsPage() {
   const { userId } = useAuth();
+  const clerk = useClerk();
   const [lyrics, setLyrics] = useState<Lyrics[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +26,7 @@ export default function LyricsPage() {
     const fetchLyrics = async () => {
       if (!userId) {
         console.log("請先登入");
+        clerk.redirectToSignIn();
         return;
       }
 
@@ -55,7 +57,7 @@ export default function LyricsPage() {
     };
 
     fetchLyrics();
-  }, [userId]);
+  }, [clerk, userId]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">載入中...</div>;

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/lib/firebase';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useClerk } from '@clerk/nextjs';
 import Link from 'next/link';
 
 interface Article {
@@ -17,6 +17,7 @@ interface Article {
 
 export default function ArticlesPage() {
   const { userId } = useAuth();
+  const clerk = useClerk();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +25,7 @@ export default function ArticlesPage() {
     const fetchArticles = async () => {
       if (!userId) {
         console.log("請先登入");
+        clerk.redirectToSignIn();
         return;
       }
 
@@ -54,7 +56,7 @@ export default function ArticlesPage() {
     };
 
     fetchArticles();
-  }, [userId]);
+  }, [clerk, userId]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">載入中...</div>;

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import MultifunctionalSearchBar from "@/components/MultifunctionalSearchBar";
 import { db } from "@/lib/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 // import { sanitizeTitle } from "@/lib/sanitize";
 import { createId } from "@paralleldrive/cuid2";
 import sanitizeHtml from 'sanitize-html';
@@ -16,6 +16,7 @@ export default function ImportArticlePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { userId } = useAuth();
+  const clerk = useClerk()
   const url = searchParams.get("url");
   
   const [article, setArticle] = useState<{ title: string; content: string } | null>(null);
@@ -26,6 +27,9 @@ export default function ImportArticlePage() {
   // Fetch the article content on load
   useEffect(() => {
     const fetchArticleContent = async () => {
+      if (!userId) {
+        clerk.redirectToSignIn();
+      }
       if (!url) return;
       setLoading(true);
       setError(null);
@@ -54,7 +58,7 @@ export default function ImportArticlePage() {
     };
 
     fetchArticleContent();
-  }, [url]);
+  }, [clerk, url, userId]);
 
   // Handle import button click
   const handleImport = async () => {

@@ -1,10 +1,17 @@
 // app/api/parseArticle/route.js
 
+import { auth } from "@clerk/nextjs/server";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
+import { NextRequest } from "next/server";
 import sanitizeHtml from 'sanitize-html';
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
+  // Check if the user is authenticated
+  const { userId } = await auth();
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  }
   try {
     const { url } = await request.json();
 
