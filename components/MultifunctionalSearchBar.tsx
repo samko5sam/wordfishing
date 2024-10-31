@@ -11,18 +11,20 @@ import { ScrollArea } from "./ui/scroll-area";
 import TextAreaWithLineBreaks from "./TextareaWithLineBreaks";
 import { useRouter } from 'next/navigation';
 
+interface Suggestion {
+  id: string | number;
+  title: string;
+  artist: {
+    name: string;
+  }
+}
+
 export default function MultifunctionalSearchBar() {
   const router = useRouter();
   const [inputValue, setInputValue] = useState("");
   const [inputTypeInfer, setInputTypeInfer] = useState<"search" | "link" | "text">("search");
   const [icon, setIcon] = useState(<Search />);
-  const [suggestions, setSuggestions] = useState<{
-    id: string | number;
-    title: string;
-    artist: {
-      name: string;
-    }
-  }[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debouncedQuery = useDebounce(inputValue, 300);
@@ -89,7 +91,7 @@ export default function MultifunctionalSearchBar() {
   };
 
   // Handle different actions on submit
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isValidUrl(inputValue)) {
@@ -121,12 +123,11 @@ export default function MultifunctionalSearchBar() {
     }
   }
 
-  const handleSuggestionSelect = (suggestion) => {
-    // setInputValue(`${suggestion.title} - ${suggestion.artist.name}`)
+  const handleSuggestionSelect = (suggestion: Suggestion) => {
     setShowSuggestions(false)
-    // Perform your task here, e.g., play the song, navigate to a page, etc.
     console.log(`Selected: ${suggestion.title} by ${suggestion.artist.name}`)
-    router.push(`/import/lyrics/${suggestion.artist.name}/${suggestion.title}`);
+    // Navigate to docs page first, it will redirect to import if needed
+    router.push(`/docs/lyrics/${suggestion.artist.name}/${suggestion.title}`);
   }
 
   useEffect(() => {
@@ -166,7 +167,7 @@ export default function MultifunctionalSearchBar() {
           />
         ) : (
           <Input
-            placeholder="Search Lyrics or type URL, or type in your content"
+            placeholder="搜尋歌詞、輸入網址或貼上文章內容"
             value={inputValue}
             onKeyDown={handleKeyDown}
             onChange={(e) => updateIconAndAction(e.target.value)}
@@ -184,7 +185,9 @@ export default function MultifunctionalSearchBar() {
               suggestions.map((suggestion, index) => (
                 <div
                   key={suggestion.id.toString()}
-                  ref={el => suggestionRefs.current[index] = el}
+                  ref={(el: HTMLDivElement | null) => {
+                    suggestionRefs.current[index] = el;
+                  }}
                   className={`flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer ${
                     index === selectedIndex ? 'bg-gray-100' : ''
                   }`}

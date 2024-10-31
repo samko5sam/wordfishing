@@ -11,6 +11,9 @@ import { useEffect, useState } from "react";
 import { lyricsApiRoot } from "@/constants/Constants";
 import { useRouter } from "next/navigation";
 import MultifunctionalSearchBar from "./MultifunctionalSearchBar";
+import { db } from "@/lib/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
+import { useAuth } from "@clerk/nextjs";
 
 export const LyricsImportPreview = ({
   artist,
@@ -20,6 +23,7 @@ export const LyricsImportPreview = ({
   song: string|string[]|undefined;
 }) => {
   const router = useRouter();
+  const { userId } = useAuth();
   const [lyrics, setLyrics] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string|null>(null);
@@ -29,29 +33,40 @@ export const LyricsImportPreview = ({
   const decodedSong = decodeURIComponent(song?.toString()||"");
 
   const handleImport = async () => {
+    if (!userId) {
+      setError("請先登入");
+      return;
+    }
+
     setImporting(true);
-    const redirectUrl = "/"; // Set this as needed
+    const redirectUrl = `/docs/lyrics/${artist}/${song}`;
 
     try {
-      // Send a POST request to the importing page
-      const response = await fetch('/api/importLyrics', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ artist, song, lyrics }),
-      });
+      // Create document ID using artist-song-userId format for user-specific access
+      const docId = `${artist}-${song}`;
 
-      if (response.ok) {
-        // Redirect to the importing page
-        router.push(redirectUrl);
-      } else {
-        console.error("Failed to initiate import");
-      }
+      // Create document data
+      const lyricsData = {
+        artist: decodedArtist,
+        title: decodedSong,
+        content: lyrics,
+        userId, // Add userId to enable user-specific access
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save to Firestore
+      const userLyricsRef = collection(db, 'content', userId, 'lyrics');
+      const lyricsDocRef = doc(userLyricsRef, docId);
+      await setDoc(lyricsDocRef, lyricsData);
+
+      // Redirect after successful save
+      router.replace(redirectUrl);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to save lyrics:", error);
+      setError("儲存失敗");
     } finally {
-      setLoading(false);
+      setImporting(false);
     }
   };
 
@@ -88,11 +103,15 @@ export const LyricsImportPreview = ({
     )
   }
 
-  if (loading) return <p>歌詞載入中...</p>;
-  if (error) return <><h2 className="text-2xl">{error}</h2><BackToHomeBtn /><MultifunctionalSearchBar /></>;
+  if (loading) return <>
+    <div className="flex items-center justify-center h-[400px]">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  </>;
+  if (error) return <><h2 className="text-2xl">{error}</h2><MultifunctionalSearchBar /><BackToHomeBtn /></>;
 
   return (
-    <Card className="max-w-md p-4">
+    <Card className="max-w-md p-4 max-h-full">
       <CardHeader>
         <BackToHomeBtn />
         <h2 className="text-xl font-semibold">
@@ -103,7 +122,14 @@ export const LyricsImportPreview = ({
         <p className="whitespace-pre-wrap mt-4">{lyrics}</p>
       </CardContent>
       <CardFooter>
-        <Button size="lg" className="w-full mt-8" onClick={handleImport} disabled={importing}>{importing ? "正在匯入..." : "匯入歌詞"}</Button>
+        <Button 
+          size="lg" 
+          className="w-full mt-8" 
+          onClick={handleImport} 
+          disabled={importing || !userId}
+        >
+          {!userId ? "請先登入" : importing ? "正在匯入..." : "匯入歌詞"}
+        </Button>
       </CardFooter>
     </Card>
   );
