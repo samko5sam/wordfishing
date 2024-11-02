@@ -89,7 +89,7 @@ export default function LyricsPage({ params }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">{lyrics.title}</h1>
-      <h2 className="text-xl text-gray-600 mb-6">{lyrics.artist}</h2>
+      <h2 className="text-xl text-gray-600 dark:text-gray-400 mb-6">{lyrics.artist}</h2>
       
       <div className="prose max-w-none">
         <pre className="whitespace-pre-wrap font-sans">

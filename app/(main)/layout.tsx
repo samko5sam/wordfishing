@@ -6,9 +6,10 @@ type Props = {
 
 export default function MainLayout({children}: Props) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       <Navbar />
-      <div className="mt-[48px] flex-1 flex flex-col">
+      <div className="min-h-[48px]"></div>
+      <div className="flex-1 flex flex-col overflow-hidden">
         {children}
       </div>
     </div>

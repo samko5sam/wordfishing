@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ListLayout({
   children,
@@ -25,8 +26,9 @@ export default function ListLayout({
   }, [pathname])
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex space-x-2 mb-6 border-b">
+    <div className="container mx-auto p-4 flex flex-col flex-1  max-w-4xl overflow-auto">
+      {/* Desktop Tabs */}
+      <div className="hidden md:flex space-x-2 mb-6 border-b">
         <button
           onClick={() => handleTabChange('articles')}
           className={cn(
@@ -50,7 +52,25 @@ export default function ListLayout({
           歌詞
         </button>
       </div>
-      {children}
+
+      {/* Mobile Select */}
+      <div className="md:hidden mb-6">
+        <Select value={activeTab} onValueChange={handleTabChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="選擇內容">
+              {activeTab === 'articles' ? '網頁' : '歌詞'}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="articles">網頁</SelectItem>
+            <SelectItem value="lyrics">歌詞</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        {children}
+      </div>
     </div>
   );
 }

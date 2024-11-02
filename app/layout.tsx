@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { FirebaseAuthProvider } from "@/components/FirebaseAuthProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,12 +32,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider dynamic>
-          <FirebaseAuthProvider>
-            {children}
-            <Toaster />
-          </FirebaseAuthProvider>
-        </ClerkProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+        >
+          <ClerkProvider dynamic>
+            <FirebaseAuthProvider>
+              {children}
+              <Toaster />
+            </FirebaseAuthProvider>
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -23,35 +24,39 @@ export default function LyricsPage() {
   const [lyrics, setLyrics] = useState<Lyrics[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchLyrics = async () => {
+    if (!userId) {
+      console.log("請先登入");
+      clerk.redirectToSignIn();
+      return;
+    }
+
+    if (!isAuthenticated) {
+      return;
+    }
+
+    const userContentRef = collection(db, "content", userId, "lyrics");
+    const q = query(userContentRef, where("userId", "==", userId));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      const lyricsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Lyrics[];
+
+      setLyrics(lyricsList);
+    } catch (error) {
+      console.error("Error fetching lyrics:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const onDeleteSuccess = () => {
+    fetchLyrics();
+  };
   useEffect(() => {
-    const fetchLyrics = async () => {
-      if (!userId) {
-        console.log("請先登入");
-        clerk.redirectToSignIn();
-        return;
-      }
-
-      if (!isAuthenticated) {
-        return;
-      }
-
-      const userContentRef = collection(db, "content", userId, "lyrics");
-      const q = query(userContentRef, where("userId", "==", userId));
-
-      try {
-        const querySnapshot = await getDocs(q);
-        const lyricsList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Lyrics[];
-
-        setLyrics(lyricsList);
-      } catch (error) {
-        console.error("Error fetching lyrics:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchLyrics();
   }, [clerk, userId, isAuthenticated]);
 
@@ -78,6 +83,7 @@ export default function LyricsPage() {
           artist={lyric.artist}
           content={lyric.content}
           createdAt={lyric.createdAt}
+          onDeleteSuccess={onDeleteSuccess}
         />
       ))}
     </div>

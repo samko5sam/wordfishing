@@ -1,12 +1,13 @@
-'use client';
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
 
-import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { useAuth, useClerk } from '@clerk/nextjs';
-import ContentCard from '@/components/ContentCard';
-import { useFirebaseAuthStatus } from '@/components/FirebaseAuthProvider';
-import { FullPageLoadingIndicator } from '@/components/layout/FullPageLoadingIndicator';
+import { useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import ContentCard from "@/components/ContentCard";
+import { useFirebaseAuthStatus } from "@/components/FirebaseAuthProvider";
+import { FullPageLoadingIndicator } from "@/components/layout/FullPageLoadingIndicator";
 
 interface Article {
   id: string;
@@ -22,36 +23,39 @@ export default function ArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchArticles = async () => {
+    if (!userId) {
+      console.log("請先登入");
+      clerk.redirectToSignIn();
+      return;
+    }
+
+    if (!isAuthenticated) {
+      return;
+    }
+
+    const userContentRef = collection(db, "content", userId, "articles");
+    const q = query(userContentRef, where("userId", "==", userId));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      const articlesList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Article[];
+
+      setArticles(articlesList);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onDeleteSuccess = () => {
+    fetchArticles();
+  };
   useEffect(() => {
-    const fetchArticles = async () => {
-      if (!userId) {
-        console.log("請先登入");
-        clerk.redirectToSignIn();
-        return;
-      }
-      
-      if (!isAuthenticated) {
-        return;
-      }
-
-      const userContentRef = collection(db, 'content', userId, 'articles');
-      const q = query(userContentRef, where('userId', '==', userId));
-      
-      try {
-        const querySnapshot = await getDocs(q);
-        const articlesList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Article[];
-        
-        setArticles(articlesList);
-      } catch (error) {
-        console.error('Error fetching articles:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchArticles();
   }, [clerk, userId, isAuthenticated]);
 
@@ -70,7 +74,15 @@ export default function ArticlesPage() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {articles.map((article) => (
-        <ContentCard key={article.id} contentType="article" id={article.id} title={article.title} content={article.content} createdAt={article.createdAt} />
+        <ContentCard
+          key={article.id}
+          contentType="articles"
+          id={article.id}
+          title={article.title}
+          content={article.content}
+          createdAt={article.createdAt}
+          onDeleteSuccess={onDeleteSuccess}
+        />
       ))}
     </div>
   );
