@@ -1,24 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 import { useAuth, useClerk } from '@clerk/nextjs';
-import { db } from '@/lib/firebase';
-import Link from 'next/link';
+import { auth, db } from '@/lib/firebase';
+import ContentCard from '@/components/ContentCard';
 
 interface Lyrics {
   id: string;
   artist: string;
   title: string;
-  lyrics: string;
+  content: string;
   createdAt: string;
 }
 
 export default function LyricsPage() {
   const { userId } = useAuth();
   const clerk = useClerk();
+  const user = auth.currentUser;
   const [lyrics, setLyrics] = useState<Lyrics[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,8 +29,6 @@ export default function LyricsPage() {
         return;
       }
 
-      const auth = getAuth();
-      const user = auth.currentUser;
       
       if (!user) {
         setLoading(false);
@@ -55,9 +52,8 @@ export default function LyricsPage() {
         setLoading(false);
       }
     };
-
     fetchLyrics();
-  }, [clerk, userId]);
+  }, [clerk, userId, user]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">載入中...</div>;
@@ -74,18 +70,7 @@ export default function LyricsPage() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {lyrics.map((lyric) => (
-        <Link key={lyric.id} href={`/docs/lyrics/${lyric.artist}/${lyric.title}`}>
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-1">{lyric.title}</h3>
-              <p className="text-sm text-gray-500 mb-2">by {lyric.artist}</p>
-              <p className="text-sm text-gray-600 line-clamp-3">{lyric.lyrics}</p>
-              <div className="mt-2 text-xs text-gray-400">
-                {new Date(lyric?.createdAt || "").toLocaleDateString()}
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+        <ContentCard key={lyric.id} contentType="lyrics" id={lyric.id} title={lyric.title} artist={lyric.artist} content={lyric.content} createdAt={lyric.createdAt} />
       ))}
     </div>
   );

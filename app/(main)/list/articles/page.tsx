@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useAuth, useClerk } from '@clerk/nextjs';
-import Link from 'next/link';
+import ContentCard from '@/components/ContentCard';
 
 interface Article {
   id: string;
@@ -18,6 +16,7 @@ interface Article {
 export default function ArticlesPage() {
   const { userId } = useAuth();
   const clerk = useClerk();
+  const user = auth.currentUser;
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,9 +27,6 @@ export default function ArticlesPage() {
         clerk.redirectToSignIn();
         return;
       }
-
-      const auth = getAuth();
-      const user = auth.currentUser;
       
       if (!user) {
         setLoading(false);
@@ -56,7 +52,7 @@ export default function ArticlesPage() {
     };
 
     fetchArticles();
-  }, [clerk, userId]);
+  }, [clerk, userId, user]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">載入中...</div>;
@@ -73,17 +69,7 @@ export default function ArticlesPage() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {articles.map((article) => (
-        <Link key={article.id} href={`/docs/article/${article.id}`}>
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-2 line-clamp-2">{article.title}</h3>
-              <p className="text-sm text-gray-500 line-clamp-3">{article.content}</p>
-              <div className="mt-2 text-xs text-gray-400">
-                {new Date(article?.createdAt || "").toLocaleDateString()}
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+        <ContentCard key={article.id} contentType="article" id={article.id} title={article.title} content={article.content} createdAt={article.createdAt} />
       ))}
     </div>
   );

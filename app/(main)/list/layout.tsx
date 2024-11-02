@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -11,12 +11,18 @@ export default function ListLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState(pathname === '/list/articles' ? 'articles' : 'lyrics');
+  const [activeTab, setActiveTab] = useState(pathname === '/list/lyrics' ? 'lyrics' : 'articles');
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     router.push(`/list/${tab}`);
   };
+
+  useEffect(() => {
+    if (pathname === '/list') return;
+    setActiveTab(pathname === '/list/lyrics' ? 'lyrics' : 'articles')
+    localStorage.setItem("lastVisitedListTab", pathname === '/list/lyrics' ? 'lyrics' : 'articles');
+  }, [pathname])
 
   return (
     <div className="container mx-auto p-4">

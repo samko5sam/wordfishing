@@ -156,7 +156,7 @@ export default function MultifunctionalSearchBar() {
   }, [selectedIndex])
   
   return (
-    <form onSubmit={handleSubmit} className="flex items-end w-full max-w-lg mx-auto mt-4">
+    <form onSubmit={handleSubmit} className="flex items-end w-full max-w-lg mx-auto mt-4 px-4">
       <div className="relative w-full max-w-lg mx-auto" ref={searchbarRef}>
         {inputTypeInfer === "text" ? (
           <TextAreaWithLineBreaks
@@ -174,7 +174,7 @@ export default function MultifunctionalSearchBar() {
             onFocus={() => {
               if (suggestions.length) setShowSuggestions(true);
             }}
-            className="rounded-l-full p-8 w-full transition-height"
+            className="rounded-l-full p-6 w-full transition-height"
           />
         )}
 
@@ -199,13 +199,13 @@ export default function MultifunctionalSearchBar() {
                 </div>
               ))
             ) : (
-              <div className="px-4 py-2 text-sm text-gray-500">No results found.</div>
+              <div className="px-4 py-2 text-sm text-gray-500">找不到推薦...</div>
             )}
           </ScrollArea>
         </div>
       )}
       </div>
-      <Button type="submit" className="rounded-r-full p-8">
+      <Button type="submit" className="rounded-r-full p-6">
         {loading ? <Loader2 className="animate-spin" /> : icon}
       </Button>
     </form>
