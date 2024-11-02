@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { useAuth, useClerk } from '@clerk/nextjs';
 import ContentCard from '@/components/ContentCard';
+import { useFirebaseAuthStatus } from '@/components/FirebaseAuthProvider';
+import { FullPageLoadingIndicator } from '@/components/layout/FullPageLoadingIndicator';
 
 interface Article {
   id: string;
@@ -15,8 +17,8 @@ interface Article {
 
 export default function ArticlesPage() {
   const { userId } = useAuth();
+  const { isAuthenticated } = useFirebaseAuthStatus();
   const clerk = useClerk();
-  const user = auth.currentUser;
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,8 +30,7 @@ export default function ArticlesPage() {
         return;
       }
       
-      if (!user) {
-        setLoading(false);
+      if (!isAuthenticated) {
         return;
       }
 
@@ -52,10 +53,10 @@ export default function ArticlesPage() {
     };
 
     fetchArticles();
-  }, [clerk, userId, user]);
+  }, [clerk, userId, isAuthenticated]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">載入中...</div>;
+  if (loading || !isAuthenticated) {
+    return <FullPageLoadingIndicator />;
   }
 
   if (articles.length === 0) {

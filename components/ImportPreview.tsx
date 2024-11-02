@@ -14,6 +14,7 @@ import MultifunctionalSearchBar from "./MultifunctionalSearchBar";
 import { db } from "@/lib/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import { FullPageLoadingIndicator } from "./layout/FullPageLoadingIndicator";
 
 export const LyricsImportPreview = ({
   artist,
@@ -108,9 +109,7 @@ export const LyricsImportPreview = ({
   }
 
   if (loading) return <>
-    <div className="flex items-center justify-center h-[400px]">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-    </div>
+    <FullPageLoadingIndicator />
   </>;
   if (error) return <><h2 className="text-2xl">{error}</h2><MultifunctionalSearchBar /><BackToHomeBtn /></>;
 

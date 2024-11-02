@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { useAuth, useClerk } from '@clerk/nextjs';
-import { auth, db } from '@/lib/firebase';
-import ContentCard from '@/components/ContentCard';
+import { useEffect, useState } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { db } from "@/lib/firebase";
+import ContentCard from "@/components/ContentCard";
+import { useFirebaseAuthStatus } from "@/components/FirebaseAuthProvider";
+import { FullPageLoadingIndicator } from "@/components/layout/FullPageLoadingIndicator";
 
 interface Lyrics {
   id: string;
@@ -16,8 +18,8 @@ interface Lyrics {
 
 export default function LyricsPage() {
   const { userId } = useAuth();
+  const { isAuthenticated } = useFirebaseAuthStatus();
   const clerk = useClerk();
-  const user = auth.currentUser;
   const [lyrics, setLyrics] = useState<Lyrics[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,34 +31,32 @@ export default function LyricsPage() {
         return;
       }
 
-      
-      if (!user) {
-        setLoading(false);
+      if (!isAuthenticated) {
         return;
       }
 
-      const userContentRef = collection(db, 'content', userId, 'lyrics');
-      const q = query(userContentRef, where('userId', '==', userId));
-      
+      const userContentRef = collection(db, "content", userId, "lyrics");
+      const q = query(userContentRef, where("userId", "==", userId));
+
       try {
         const querySnapshot = await getDocs(q);
-        const lyricsList = querySnapshot.docs.map(doc => ({
+        const lyricsList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         })) as Lyrics[];
-        
+
         setLyrics(lyricsList);
       } catch (error) {
-        console.error('Error fetching lyrics:', error);
+        console.error("Error fetching lyrics:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchLyrics();
-  }, [clerk, userId, user]);
+  }, [clerk, userId, isAuthenticated]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">載入中...</div>;
+  if (loading || !isAuthenticated) {
+    return <FullPageLoadingIndicator />;
   }
 
   if (lyrics.length === 0) {
@@ -70,7 +70,15 @@ export default function LyricsPage() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {lyrics.map((lyric) => (
-        <ContentCard key={lyric.id} contentType="lyrics" id={lyric.id} title={lyric.title} artist={lyric.artist} content={lyric.content} createdAt={lyric.createdAt} />
+        <ContentCard
+          key={lyric.id}
+          contentType="lyrics"
+          id={lyric.id}
+          title={lyric.title}
+          artist={lyric.artist}
+          content={lyric.content}
+          createdAt={lyric.createdAt}
+        />
       ))}
     </div>
   );

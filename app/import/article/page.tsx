@@ -11,6 +11,7 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 // import { sanitizeTitle } from "@/lib/sanitize";
 import { createId } from "@paralleldrive/cuid2";
 import sanitizeHtml from 'sanitize-html';
+import { FullPageLoadingIndicator } from "@/components/layout/FullPageLoadingIndicator";
 
 export default function ImportArticlePage() {
   const searchParams = useSearchParams();
@@ -114,9 +115,7 @@ export default function ImportArticlePage() {
       </div>
 
       {loading && <>
-        <div className="flex items-center justify-center h-[400px]">
-          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-        </div>
+        <FullPageLoadingIndicator />
       </>}
       {error && <><h2 className="text-2xl">{error}</h2><Button variant="link" onClick={() => window.location.reload()}>重試</Button><MultifunctionalSearchBar /><BackToHomeBtn /></>}
 

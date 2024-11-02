@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { use } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
+import { FullPageLoadingIndicator } from '@/components/layout/FullPageLoadingIndicator'
 
 interface PageProps {
   params: Promise<{
@@ -67,11 +68,7 @@ export default function LyricsPage({ params }: PageProps) {
   }, [artist, song, router, userId])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    )
+    return <FullPageLoadingIndicator />
   }
 
   if (error) {
