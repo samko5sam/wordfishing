@@ -91,8 +91,8 @@ export default function MultifunctionalSearchBar() {
   };
 
   // Handle different actions on submit
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
 
     if (isValidUrl(inputValue)) {
       console.log("URL: " + inputValue); // Open URL
@@ -111,7 +111,7 @@ export default function MultifunctionalSearchBar() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key.toLowerCase() === "arrowdown") {
       e.preventDefault()
       setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev))
@@ -120,6 +120,10 @@ export default function MultifunctionalSearchBar() {
       setSelectedIndex(prev => (prev > 0 ? prev - 1 : prev))
     } else if (e.key.toLowerCase() === "enter" && selectedIndex !== -1) {
       handleSuggestionSelect(suggestions[selectedIndex])
+      e.preventDefault()
+    } else if (e.key.toLowerCase() === "enter" && inputTypeInfer !== "text"){
+      e.preventDefault()
+      handleSubmit()
     }
   }
 
@@ -158,25 +162,18 @@ export default function MultifunctionalSearchBar() {
   return (
     <form onSubmit={handleSubmit} className="flex items-end w-full max-w-lg mx-auto mt-4 px-4">
       <div className="relative w-full max-w-lg mx-auto" ref={searchbarRef}>
-        {inputTypeInfer === "text" ? (
-          <TextAreaWithLineBreaks
-            value={inputValue}
-            onChange={(e) => updateIconAndAction(e.target.value)}
-            rows={10} // Customize rows as needed
-            className="p-4 w-full resize-none transition-height whitespace-pre-wrap"
-          />
-        ) : (
-          <Input
-            placeholder="搜尋歌詞、輸入網址或貼上文章內容"
-            value={inputValue}
-            onKeyDown={handleKeyDown}
-            onChange={(e) => updateIconAndAction(e.target.value)}
-            onFocus={() => {
-              if (suggestions.length) setShowSuggestions(true);
-            }}
-            className="rounded-l-full p-6 w-full transition-height"
-          />
-        )}
+
+      <TextAreaWithLineBreaks
+        placeholder="搜尋歌詞、輸入網址或貼上文章內容"
+        value={inputValue}
+        onKeyDown={handleKeyDown}
+        onChange={(e) => updateIconAndAction(e.target.value)}
+        onFocus={() => {
+          if (suggestions.length) setShowSuggestions(true);
+        }}
+        rows={inputTypeInfer === "text" ? 12 : 12}
+        className={inputTypeInfer === "text" ? "p-4 w-full resize-none whitespace-pre-wrap" : "rounded-l-full px-6 h-[48px] w-full py-3 resize-none overflow-hidden min-h-0"}
+      />
 
       {showSuggestions && (
         <div className="absolute w-full mt-1 bg-white border rounded-md shadow-lg z-10">

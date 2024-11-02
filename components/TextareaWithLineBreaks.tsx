@@ -1,5 +1,5 @@
-import { useState, ClipboardEvent, ChangeEvent, FC } from 'react';
-import { Textarea } from './ui/textarea';
+import { useState, ChangeEvent, FC } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface TextAreaWithLineBreaksProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   onChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -7,12 +7,6 @@ interface TextAreaWithLineBreaksProps extends React.TextareaHTMLAttributes<HTMLT
 
 const TextAreaWithLineBreaks: FC<TextAreaWithLineBreaksProps> = ({ onChange, ...props }) => {
   const [text, setText] = useState('');
-
-  const handlePaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-    const pastedText = e.clipboardData.getData('text');
-    setText((prevText) => prevText + pastedText);
-  };
 
   const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
@@ -25,7 +19,6 @@ const TextAreaWithLineBreaks: FC<TextAreaWithLineBreaksProps> = ({ onChange, ...
     <Textarea
       value={text}
       onChange={handleTextChange}
-      onPaste={handlePaste}
       style={{ whiteSpace: 'pre-wrap' }}
       {...props}
     />
