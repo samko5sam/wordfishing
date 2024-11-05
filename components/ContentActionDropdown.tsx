@@ -87,9 +87,9 @@ export function ContentActionDropdown({
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="rounded-xl">
           <DialogHeader>
-            <DialogTitle>刪除{contentType === "article" ? "網頁" : "歌詞"}</DialogTitle>
+            <DialogTitle>刪除{contentType === "articles" ? "網頁" : "歌詞"}</DialogTitle>
             <DialogDescription>
-              您確定要刪除這個{contentType === "article" ? "網頁" : "歌詞"}嗎？此操作無法撤銷。
+              您確定要刪除這個{contentType === "articles" ? "網頁" : "歌詞"}嗎？此操作無法撤銷。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

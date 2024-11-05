@@ -14,10 +14,30 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+// Placeholder vocabulary folder data
+const vocabularyFolders = [
+  {
+    title: '一般',
+    url: '/vocab/general',
+  },
+  {
+    title: 'Linguistics',
+    url: '/vocab/linguistics',
+  },
+  {
+    title: 'Science',
+    url: '/vocab/science',
+  },
+  {
+    title: 'History',
+    url: '/vocab/history',
+  },
+];
+
 export default function Page() {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar folders={vocabularyFolders} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
