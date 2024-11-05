@@ -172,7 +172,7 @@ export default function MultifunctionalSearchBar() {
           if (suggestions.length) setShowSuggestions(true);
         }}
         rows={inputTypeInfer === "text" ? 12 : 12}
-        className={inputTypeInfer === "text" ? "p-4 w-full resize-none whitespace-pre-wrap" : "rounded-l-full px-6 h-[48px] w-full py-3 resize-none overflow-hidden min-h-0"}
+        className={inputTypeInfer === "text" ? "p-4 w-full resize-none whitespace-pre-wrap" : "rounded-l-full px-6 h-[48px] w-full py-[15px] text-[14px] resize-none overflow-hidden min-h-0"}
       />
 
       {showSuggestions && (
