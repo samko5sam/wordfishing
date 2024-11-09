@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -45,6 +45,8 @@ export default function ChatbotPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentApiKey, setCurrentApiKey] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState("你是一個有幫助的智慧學習助手，請依照問題使用繁體中文或英文回答。");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const lastSelectedProvider = window.localStorage.getItem(
@@ -71,6 +73,12 @@ export default function ChatbotPage() {
       setIsConfigExpanded(true);
     }
   }, [selectedProvider]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const saveApiKey = () => {
     if (!currentApiKey) return;
@@ -112,16 +120,16 @@ export default function ChatbotPage() {
       case "openai":
         return {
           model: "gpt-4",
-          messages: messages,
+          messages: [{ role: "system", content: systemPrompt }, ...messages],
           stream: true,
         };
       case "anthropic":
         return {
           model: "claude-3-haiku-20240307",
-          messages: messages.map((msg) => ({
+          messages: [{ role: "system", content: systemPrompt }, ...messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
-          })),
+          }))],
         };
       case "gemini":
         return {
@@ -129,7 +137,7 @@ export default function ChatbotPage() {
             {
               parts: [
                 {
-                  text: messages[messages.length - 1].content,
+                  text: systemPrompt + "\n\n" + messages[messages.length - 1].content,
                 },
               ],
             },
@@ -138,7 +146,7 @@ export default function ChatbotPage() {
       case "groq":
         return {
           model: "llama3-8b-8192",
-          messages: messages,
+          messages: [{ role: "system", content: systemPrompt }, ...messages],
           stream: true,
         };
       default:
@@ -163,7 +171,7 @@ export default function ChatbotPage() {
         return {
           "Content-Type": "application/json",
           "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
+          "anthropic-version": "2024-03-07",
         };
       case "gemini":
         return {
@@ -278,11 +286,14 @@ export default function ChatbotPage() {
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, there was an error processing your request.",
+          content: "對不起，處理您的請求時發生錯誤。",
         },
       ]);
     } finally {
       setIsLoading(false);
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -356,6 +367,19 @@ export default function ChatbotPage() {
                     您的 API 金鑰將安全地儲存在您的瀏覽器中。
                   </p>
                 </div>
+
+                <div>
+                  <h2 className="text-lg font-semibold mb-2">自訂系統提示</h2>
+                  <Textarea
+                    value={systemPrompt}
+                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    placeholder="輸入系統提示..."
+                    className="flex-1"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    指令將被加到每個 AI 請求中，以自定義助手的行為。
+                  </p>
+                </div>
               </div>
             </Card>
           )}
@@ -376,6 +400,7 @@ export default function ChatbotPage() {
               {message.content}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
