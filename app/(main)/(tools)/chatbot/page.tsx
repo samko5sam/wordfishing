@@ -17,7 +17,7 @@ import { Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
@@ -100,14 +100,14 @@ export default function ChatbotPage() {
     setMessages([]);
   };
 
-  const getEndpointForProvider = (provider: string) => {
+  const getEndpointForProvider = (provider: string, apiKey: string) => {
     switch (provider) {
       case "openai":
         return "https://api.openai.com/v1/chat/completions";
       case "anthropic":
         return "https://api.anthropic.com/v1/messages";
       case "gemini":
-        return "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
       case "groq":
         return "https://api.groq.com/openai/v1/chat/completions";
       default:
@@ -120,16 +120,18 @@ export default function ChatbotPage() {
       case "openai":
         return {
           model: "gpt-4",
-          messages: [{ role: "system", content: systemPrompt }, ...messages],
+          messages,
           stream: true,
         };
       case "anthropic":
         return {
           model: "claude-3-haiku-20240307",
-          messages: [{ role: "system", content: systemPrompt }, ...messages.map((msg) => ({
+          system: systemPrompt,
+          "max_tokens": 1024,
+          messages: messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
-          }))],
+          })),
         };
       case "gemini":
         return {
@@ -146,7 +148,7 @@ export default function ChatbotPage() {
       case "groq":
         return {
           model: "llama3-8b-8192",
-          messages: [{ role: "system", content: systemPrompt }, ...messages],
+          messages,
           stream: true,
         };
       default:
@@ -159,6 +161,7 @@ export default function ChatbotPage() {
     Authorization?: string;
     "x-api-key"?: string;
     "anthropic-version"?: string;
+    "anthropic-dangerous-direct-browser-access"?: string;
   }  => {
     switch (provider) {
       case "openai":
@@ -171,12 +174,12 @@ export default function ChatbotPage() {
         return {
           "Content-Type": "application/json",
           "x-api-key": apiKey,
-          "anthropic-version": "2024-03-07",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
         };
       case "gemini":
         return {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
         };
       default:
         return {};
@@ -206,12 +209,28 @@ export default function ChatbotPage() {
     setIsLoading(true);
 
     try {
-      const endpoint = getEndpointForProvider(selectedProvider);
-      const headers = getHeadersForProvider(selectedProvider, currentApiKey);
-      const body = formatRequestForProvider(selectedProvider, [
+      const requestMessages = [
         ...messages,
-        newMessage,
-      ]);
+      ]
+      if (requestMessages.length === 0){
+        switch (selectedProvider) {
+          case "openai":
+          case "groq":
+            requestMessages.push({
+              role: "system",
+              content: systemPrompt
+            })
+            break;
+        
+          default:
+            break;
+        }
+      }
+      requestMessages.push(newMessage);
+
+      const endpoint = getEndpointForProvider(selectedProvider, currentApiKey);
+      const headers = getHeadersForProvider(selectedProvider, currentApiKey);
+      const body = formatRequestForProvider(selectedProvider, requestMessages);
 
       if (selectedProvider === "openai" || selectedProvider === "groq") {
         const response = await fetch(endpoint, {
@@ -388,7 +407,9 @@ export default function ChatbotPage() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-4">
-          {messages.map((message, index) => (
+          {messages.map((message, index) => {
+            if (message.role === "system") return null;
+            return (
             <div
               key={index}
               className={`p-4 rounded-lg whitespace-pre-wrap ${
@@ -399,7 +420,8 @@ export default function ChatbotPage() {
             >
               {message.content}
             </div>
-          ))}
+          )
+          })}
           <div ref={messagesEndRef} />
         </div>
       </div>
