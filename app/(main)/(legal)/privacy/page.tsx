@@ -10,23 +10,23 @@ export default function PrivacyPage() {
       <h2 className="text-xl font-bold text-gray-900 mb-4">Information We Collect</h2>
       <p className="text-gray-700 mb-4">
         We may collect the following types of information from you:
-        <ul className="list-disc pl-6 mb-4">
-          <li>Name and contact information</li>
-          <li>Usage data, such as pages visited and actions taken on our website</li>
-          <li>Device and browser information</li>
-          <li>Location data (if you choose to share it)</li>
-        </ul>
       </p>
+      <ul className="list-disc pl-6 mb-4">
+        <li>Name and contact information</li>
+        <li>Usage data, such as pages visited and actions taken on our website</li>
+        <li>Device and browser information</li>
+        <li>Location data (if you choose to share it)</li>
+      </ul>
       <h2 className="text-xl font-bold text-gray-900 mb-4">How We Use Your Information</h2>
       <p className="text-gray-700 mb-4">
         We use the information we collect to:
-        <ul className="list-disc pl-6 mb-4">
-          <li>Provide and improve our products and services</li>
-          <li>Personalize your experience on our website</li>
-          <li>Communicate with you about our products and services</li>
-          <li>Comply with legal and regulatory requirements</li>
-        </ul>
       </p>
+      <ul className="list-disc pl-6 mb-4">
+        <li>Provide and improve our products and services</li>
+        <li>Personalize your experience on our website</li>
+        <li>Communicate with you about our products and services</li>
+        <li>Comply with legal and regulatory requirements</li>
+      </ul>
       <h2 className="text-xl font-bold text-gray-900 mb-4">How We Protect Your Information</h2>
       <p className="text-gray-700 mb-4">
         We take reasonable measures to protect your personal information from unauthorized access, use, or disclosure. This includes using encryption, access controls, and other security measures.
