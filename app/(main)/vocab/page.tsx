@@ -62,15 +62,15 @@ const vocabularyFolders = [
     url: '/vocab/general',
   },
   {
-    title: 'Linguistics',
+    title: '語言學',
     url: '/vocab/linguistics',
   },
   {
-    title: 'Science',
+    title: '自然科學',
     url: '/vocab/science',
   },
   {
-    title: 'History',
+    title: '歷史',
     url: '/vocab/history',
   },
 ];
