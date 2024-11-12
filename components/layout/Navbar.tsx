@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  BookA,
   Fish,
   Folder,
   LayoutGrid,
@@ -94,6 +95,11 @@ export const Navbar = () => {
           onClick={() => router.push("/list")}
           icon={<Folder />}
           tooltip="我的學習庫"
+        />
+        <NavbarIconLink
+          onClick={() => router.push("/vocab")}
+          icon={<BookA />}
+          tooltip="單字庫"
         />
         <NavbarIconLink
           onClick={() => router.push("/tools")}
