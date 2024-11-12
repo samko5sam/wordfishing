@@ -2,14 +2,13 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Link, TextCursorInput, Loader2, Music2 } from "lucide-react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { lyricsApiRoot } from "@/constants/Constants";
 import { ScrollArea } from "./ui/scroll-area";
-import TextAreaWithLineBreaks from "./TextareaWithLineBreaks";
 import { useRouter } from 'next/navigation';
+import { Textarea } from "@/components/ui/textarea";
 
 interface Suggestion {
   id: string | number;
@@ -163,7 +162,7 @@ export default function MultifunctionalSearchBar() {
     <form onSubmit={handleSubmit} className="flex items-end w-full max-w-lg mx-auto mt-4 px-4">
       <div className="relative w-full max-w-lg mx-auto" ref={searchbarRef}>
 
-      <TextAreaWithLineBreaks
+      <Textarea
         placeholder="搜尋歌詞、輸入網址或貼上文章內容"
         value={inputValue}
         onKeyDown={handleKeyDown}
