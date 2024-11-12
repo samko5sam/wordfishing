@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from 'react-markdown'
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -418,7 +419,9 @@ export default function ChatbotPage() {
                   : "bg-gray-100 dark:bg-gray-700 mr-12"
               }`}
             >
-              {message.content}
+              <ReactMarkdown>
+                {message.content}
+              </ReactMarkdown>
             </div>
           )
           })}
