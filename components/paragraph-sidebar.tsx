@@ -56,13 +56,14 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar> & Ap
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="p-5">
-        <Textarea placeholder="Type your message here." id="message" rows={10} />
+        <Textarea placeholder="Type stuff to translate here" id="message" rows={10} />
         <Button variant="default">翻譯</Button>
         <Card>
           <CardContent>
             <p>Card Content</p>
           </CardContent>
         </Card>
+        <Button variant="default">加入單字庫</Button>
       </SidebarContent>
       <SidebarFooter>
         {/* <div className="p-1">

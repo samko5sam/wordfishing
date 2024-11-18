@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex-1 flex flex-col">
       <div className="flex-1 flex items-center flex-col justify-center">
-        <h1 className="text-4xl font-semibold mb-2 text-blue-500 dark:text-blue-300 text-center">Word Fishing</h1>
+        <h1 className="text-6xl font-semibold mb-2 text-blue-500 dark:text-blue-300 text-center">Word Fishing</h1>
         <MultifunctionalSearchBar />
         <TooltipProvider>
           <div className="mt-8 flex space-x-4 justify-center">

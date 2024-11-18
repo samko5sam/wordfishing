@@ -87,10 +87,10 @@ export default function VocabularyPage() {
           <h1 className="text-2xl font-bold mb-4">單字庫</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {vocabularyData.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow p-4 relative">
-                <h2 className="text-lg font-bold">{item.word}</h2>
-                <p className='mb-8'>{item.definition}</p>
-                <span className="absolute bottom-2 text-gray-500 mt-2 flex flex-row items-center gap-2">
+              <div key={item.id} className="bg-white dark:bg-gray-100 rounded-lg dark:bg-gray-800 shadow p-4 relative">
+                <h2 className="text-lg font-bold dark:text-gray-200">{item.word}</h2>
+                <p className='mb-8 dark:text-gray-200'>{item.definition}</p>
+                <span className="absolute bottom-2 text-gray-500 dark:text-gray-130 mt-2 flex flex-row items-center gap-2">
                   <FolderIcon size={16} /> {item.folder}
                 </span>
               </div>
