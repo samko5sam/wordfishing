@@ -18,6 +18,7 @@ export default function ListLayout({
         { value: 'lyrics', label: '歌詞' },
       ]}
       initialTab={pathname?.split('/')[2] || 'lyrics'}
+      prefix='list'
     >
       {children}
     </TabLayout>

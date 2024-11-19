@@ -20,6 +20,7 @@ interface TabLayoutProps {
   onTabChange?: (tab: string) => void;
   children: React.ReactNode;
   type?: "full";
+  prefix?: string;
 }
 
 export default function TabLayout({
@@ -27,7 +28,8 @@ export default function TabLayout({
   initialTab,
   onTabChange,
   children,
-  type
+  type,
+  prefix
 }: TabLayoutProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -39,7 +41,7 @@ export default function TabLayout({
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     onTabChange?.(tab);
-    router.push(`/${tab}`);
+    router.push(`/${prefix ? `${prefix}/` : ""}${tab}`);
   };
 
   return (
