@@ -10,48 +10,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useTranslate } from "@/hooks/use-translate";
 
 const TranslateTestPage = () => {
-  const { toast } = useToast();
   const [text, setText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState("en");
+  const [sourceLanguage, setSourceLanguage] = useState("detect");
   const [targetLanguage, setTargetLanguage] = useState("zh-Hant");
   const [languages, setLanguages] = useState<string[]>([]);
+  const {translate, translatedText, translationLoading} = useTranslate();
 
-  const handleTranslate = async () => {
-    try {
-      const response = await fetch("/api/translate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-          from: sourceLanguage,
-          to: targetLanguage,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setTranslatedText(data[0].translations[0].text);
-      } else {
-        console.error("Translation failed");
-        if (response.status == 401) {
-          toast({
-            title: "請先登入帳號",
-            variant: "destructive",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+  const handleTranslate = () => {
+    translate(text, targetLanguage, sourceLanguage === "detect" ? undefined : sourceLanguage);
+  }
 
   const handleSourceLanguageChange = (language: string) => {
     setSourceLanguage(language);
@@ -106,6 +77,9 @@ const TranslateTestPage = () => {
               <SelectValue placeholder="來源語言" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem key="detect" value="detect">
+                自動偵測
+              </SelectItem>
               {languages.map((item) => (
                 <SelectItem key={item} value={item}>
                   {item}
@@ -145,8 +119,7 @@ const TranslateTestPage = () => {
           翻譯
         </Button>
         <div className=" overflow-y-auto">
-          {/* <h2>Translated Text</h2> */}
-          <p style={{wordBreak: "break-word"}}>{translatedText}</p>
+          {translationLoading ? <div><Loader2 className="animate-spin" /></div> : <p style={{wordBreak: "break-word"}}>{translatedText}</p>}
         </div>
       </Card>
     </div>
