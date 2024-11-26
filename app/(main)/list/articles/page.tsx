@@ -44,6 +44,8 @@ export default function ArticlesPage() {
         ...doc.data(),
       })) as Article[];
 
+      articlesList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
       setArticles(articlesList);
     } catch (error) {
       console.error("Error fetching articles:", error);
