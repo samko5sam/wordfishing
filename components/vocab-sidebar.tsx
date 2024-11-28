@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { NavMain } from "@/components/nav-main"
+import { NavMain } from "@/components/vocab-nav-main"
 import {
   Sidebar,
   SidebarContent,
@@ -22,16 +22,17 @@ type VocabularyFolder = {
 
 type AppSidebarProps = {
   folders: VocabularyFolder[];
+  isFolderLoading: boolean;
 };
 
-export function AppSidebar({ folders, ...props }: React.ComponentProps<typeof Sidebar> & AppSidebarProps) {
+export function AppSidebar({ folders, isFolderLoading, ...props }: React.ComponentProps<typeof Sidebar> & AppSidebarProps) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <SearchForm />
       </SidebarHeader>
       <SidebarContent>
-        {folders.length ? <NavMain items={folders} /> : <div className="w-full flex justify-center mt-4"><Loader2 className="animate-spin" /></div>}
+        {!isFolderLoading ? <NavMain items={folders} /> : <div className="w-full flex justify-center mt-4"><Loader2 className="animate-spin" /></div>}
       </SidebarContent>
       <SidebarFooter>
       </SidebarFooter>

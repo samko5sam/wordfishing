@@ -12,10 +12,12 @@ interface Folder {
 
 export const useAvailableFolders = () => {
   const [availableFolders, setAvailableFolders] = useState<Folder[]>([]);
+  const [isFolderLoading, setIsFolderLoading] = useState(false);
   const { userId } = useAuth();
 
   const fetchAvailableFolders = async () => {
     if (!userId) return;
+    setIsFolderLoading(true);
     const querySnapshot = await getDocs(collection(db, 'vocabularies', userId, 'folders'));
     const folders: Folder[] = [];
     querySnapshot.forEach((doc) => {
@@ -29,6 +31,7 @@ export const useAvailableFolders = () => {
     folders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     setAvailableFolders(folders);
+    setIsFolderLoading(false);
   };
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export const useAvailableFolders = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  return { availableFolders, fetchAvailableFolders };
+  return { availableFolders, fetchAvailableFolders, isFolderLoading };
 };
 
 export const useVocabFolder = () => {

@@ -1,6 +1,5 @@
 "use client";
 
-import { AppSidebar } from "@/components/vocab-sidebar";
 import { FolderIcon, FolderPlus } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -17,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ContentActionDropdown } from "@/components/ContentActionDropdown";
 
 export default function VocabularyPage() {
-  const { availableFolders, fetchAvailableFolders } = useAvailableFolders();
+  const { availableFolders, fetchAvailableFolders, isFolderLoading } = useAvailableFolders();
   const { addVocabFolder } = useAddVocabularyFolder();
   const [inputText, setInputText] = useState("");
 
@@ -27,13 +26,6 @@ export default function VocabularyPage() {
     openDialog,
     closeDialog,
   } = useConfirmationDialog();
-
-  const vocabularyFolders = availableFolders.map((folder) => {
-    return {
-      title: folder.folderName,
-      url: `/vocab/${folder.id}`,
-    };
-  });
 
   const vocabularyData = availableFolders.map((folder) => {
     return {
@@ -48,52 +40,52 @@ export default function VocabularyPage() {
   };
 
   const handleConfirm = () => {
-    // console.log(inputText)
     addVocabFolder(inputText);
     closeDialog();
     setInputText("");
     fetchAvailableFolders();
   };
   return (
-    <div className="flex-1 flex h-full overflow-hidden">
-      <AppSidebar
-        folders={[{ title: "全部", url: "/vocab", items: vocabularyFolders }]}
-        className="border-r pt-[48px]"
-      />
-      <div className="flex-1 max-h-full overflow-y-scroll">
-        <div className="p-4">
-          <SidebarTrigger className="p-4" />
-        </div>
-        <div className="px-8">
-          <h1 className="text-2xl font-bold mb-4">單字庫</h1>
-          <div className="flex justify-end">
-            <Button
-              variant="default"
-              className="mb-4"
-              onClick={handleCreateNewFolder}
-            >
-              <FolderPlus /> 建立資料夾
-            </Button>
-          </div>
-          <ConfirmationDialog
-            isOpen={isDeleteDialogOpen}
-            isLoading={isDeleting}
-            onOpenChange={closeDialog}
-            onConfirm={handleConfirm}
-            title="新增資料夾"
-            description="新增一個單字資料夾"
-            confirmText="新增"
-            cancelText="取消"
+    <div className="flex-1 max-h-full overflow-y-scroll">
+      <div className="p-4">
+        <SidebarTrigger className="p-4" />
+      </div>
+      <div className="px-8">
+        <h1 className="text-2xl font-bold mb-4">單字庫</h1>
+        <div className="flex justify-end">
+          <Button
             variant="default"
-            inputText={inputText}
-            setInputText={setInputText}
-          />
-          {!vocabularyData.length && <FullPageLoadingIndicator />}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {vocabularyData.map((item) => (
-              <FolderItem key={item.id} item={item} onDeleteSuccess={() => fetchAvailableFolders()} />
-            ))}
+            className="mb-4"
+            onClick={handleCreateNewFolder}
+          >
+            <FolderPlus /> 建立資料夾
+          </Button>
+        </div>
+        <ConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          isLoading={isDeleting}
+          onOpenChange={closeDialog}
+          onConfirm={handleConfirm}
+          title="新增資料夾"
+          description="新增一個單字資料夾"
+          confirmText="新增"
+          cancelText="取消"
+          variant="default"
+          inputText={inputText}
+          setInputText={setInputText}
+        />
+        {isFolderLoading && <FullPageLoadingIndicator />}
+        {!vocabularyData.length && !isFolderLoading &&
+          <div className="flex flex-col items-center justify-center h-full">
+            <FolderIcon className="w-16 h-16 text-gray-400 mb-4" />
+            <h1 className="text-xl font-semibold text-gray-500">尚未建立資料夾</h1>
+            <p className="text-gray-400 mt-2">使用上方按鈕來新增一個資料夾吧！</p>
           </div>
+        }
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {vocabularyData.map((item) => (
+            <FolderItem key={item.id} item={item} onDeleteSuccess={() => fetchAvailableFolders()} />
+          ))}
         </div>
       </div>
     </div>
