@@ -63,13 +63,14 @@ export const Navbar = () => {
   const router = useRouter();
   const isHomePage = pathname === "/";
   const isDocsPage = pathname?.startsWith("/docs/");
+  const isVocabPage = pathname?.startsWith("/vocab/");
 
   return (
     <div className="fixed top-0 left-0 right-0 w-full flex justify-between items-center p-2 min-h-[54px] bg-white/80 backdrop-blur-sm z-50 border-b dark:bg-black/80">
       <div className="flex flex-row">
         {!isHomePage && (
           <>
-            {isDocsPage && (
+            {(isDocsPage || isVocabPage) && (
               <NavbarIconLink
                 onClick={() => router.back()}
                 icon={<ArrowLeft />}

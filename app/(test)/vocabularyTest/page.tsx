@@ -7,38 +7,14 @@ import { useRouter } from "next/navigation";
 import { collection, addDoc, getDocs, doc } from "firebase/firestore"; 
 import { db } from "@/lib/firebase";
 import { useAuth } from "@clerk/clerk-react";
+import {useAvailableFolders} from "@/hooks/use-vocabularies";
 
 const AddVocabulary = () => {
   const { userId } = useAuth();
   const [folderName, setFolderName] = useState<string>("");
   const [selectedFolder, setSelectedFolder] = useState<string>(""); // Add state for selected folder
   const [vocabInfo, setVocabInfo] = useState<string>("");
-  const [availableFolders, setAvailableFolders] = useState<{
-    folderName: any;
-    id: any;
-  }[]>([]);
-  const router = useRouter();
-
-  const fetchAvailableFolders = async () => {
-    if (!userId) return;
-    const querySnapshot = await getDocs(collection(db, "vocabularies", userId, "folders"));
-    const folders: {
-      folderName: any;
-      id: any;
-    }[] = [];
-    querySnapshot.forEach((doc) => {
-      folders.push({
-        folderName: doc.data().folderName,
-        id: doc.id
-      });
-    });
-    setAvailableFolders(folders);
-  };
-  
-  useEffect(() => {
-    fetchAvailableFolders();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  const {availableFolders, fetchAvailableFolders} = useAvailableFolders();
 
   const handleAddVocabulary = async () => {
     if (!userId) return;
