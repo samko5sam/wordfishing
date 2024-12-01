@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '@clerk/clerk-react';
 import { useRouter } from 'next/navigation';
 
 interface Folder {
-  folderName: any;
-  id: any;
+  folderName: string;
+  id: string;
+  createdAt: string;
+  marked: boolean;
+}
+
+interface Vocabulary {
+  folderId?: string;
+  title: string;
+  description: string;
+  marked: boolean;
+  id: string;
   createdAt: string;
 }
 
@@ -23,6 +33,7 @@ export const useAvailableFolders = () => {
     querySnapshot.forEach((doc) => {
       folders.push({
         folderName: doc.data().folderName,
+        marked: doc.data().marked,
         id: doc.id,
         createdAt: doc.data().createdAt
       });
@@ -86,6 +97,7 @@ export const useAddVocabularyFolder = () => {
     try {
       const docRef = await addDoc(collection(db, "vocabularies", userId, "folders"), {
         folderName,
+        marked: false,
         createdAt: new Date().toISOString()
       });
 
@@ -99,3 +111,66 @@ export const useAddVocabularyFolder = () => {
 
   return {addVocabFolder}
 }
+
+export const useAddVocabulary = () => {
+  const { userId } = useAuth();
+  const addVocab = async (vocabData: {
+    folderId: string;
+    title: string;
+    description?: string;
+  }) => {
+    if (!userId || !vocabData.folderId) return;
+    try {
+      const docRef = await addDoc(collection(db, "vocabularies", userId, "vocab"), {
+        folderRef: doc(db, "vocabularies", userId, "folders", vocabData.folderId),
+        title: vocabData.title,
+        description: vocabData.description,
+        marked: false,
+        createdAt: new Date().toISOString(),
+      });
+
+      console.log("Vocabulary created with ID: ", docRef.id);
+      
+      // Optional: redirect or notify of success
+    } catch (error) {
+      console.error("Error adding vocabulary: ", error);
+    }
+  };
+
+  return {addVocab}
+}
+
+export const useVocabulariesInFolder = (folderId: string) => {
+  const [allVocabularies, setAllVocabularies] = useState<Vocabulary[]>([]);
+  const [isVocabLoading, setIsVocabLoading] = useState(false);
+  const { userId } = useAuth();
+
+  const fetchAllVocabularies = async () => {
+    if (!userId) return;
+    setIsVocabLoading(true);
+    const folderRef = doc(db, 'vocabularies', userId, 'folders', folderId);
+    const querySnapshot = await getDocs(query(collection(db, 'vocabularies', userId, 'vocab'), where("folderRef", "==", folderRef)));
+    const vocabularies: Vocabulary[] = [];
+    querySnapshot.forEach((doc) => {
+      vocabularies.push({
+        title: doc.data().title,
+        description: doc.data().description,
+        marked: doc.data().marked,
+        id: doc.id,
+        createdAt: doc.data().createdAt
+      });
+    });
+    
+    vocabularies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    setAllVocabularies(vocabularies);
+    setIsVocabLoading(false);
+  };
+
+  useEffect(() => {
+    fetchAllVocabularies();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  return { allVocabularies, fetchAllVocabularies, isVocabLoading };
+};

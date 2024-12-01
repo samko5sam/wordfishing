@@ -46,7 +46,7 @@ export default function VocabularyPage() {
     fetchAvailableFolders();
   };
   return (
-    <div className="flex-1 max-h-full overflow-y-scroll">
+    <div className="flex-1 h-full overflow-y-auto pb-24">
       <div className="p-4">
         <SidebarTrigger className="p-4" />
       </div>
