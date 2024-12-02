@@ -1,31 +1,24 @@
 "use client"
-
-import { MoreVertical, Trash } from "lucide-react"
-import { collection, deleteDoc, doc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import { MoreVertical, Trash } from "lucide-react";
+import { collection, deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useAuth } from "@clerk/nextjs"
-import { useToast } from "@/hooks/use-toast"
-import { useState } from "react"
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@clerk/nextjs";
+import { useToast } from "@/hooks/use-toast";
+import { useConfirmationDialog } from "@/hooks/use-confirmation-dialog";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { useVocabFolder } from "@/hooks/use-vocabularies";
 
 interface ContentActionDropdownProps {
-  contentType: 'articles' | 'lyrics'
-  documentId: string
-  onDeleteSuccess?: () => void
+  contentType: 'articles' | 'lyrics' | 'vocabFolder';
+  documentId: string;
+  onDeleteSuccess?: () => void;
 }
 
 export function ContentActionDropdown({
@@ -33,50 +26,87 @@ export function ContentActionDropdown({
   documentId,
   onDeleteSuccess
 }: ContentActionDropdownProps) {
+  const { deleteFolder } = useVocabFolder();
   const { userId } = useAuth();
   const { toast } = useToast();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const { 
+    isOpen: isDeleteDialogOpen, 
+    isLoading: isDeleting, 
+    openDialog, 
+    closeDialog, 
+    handleConfirm 
+  } = useConfirmationDialog();
+
+  const contentTypeToText = {
+    'articles': "文章",
+    'lyrics': "歌詞",
+    'vocabFolder': "資料夾"
+  }
 
   const handleDelete = async () => {
     if (!userId) {
       toast({
         title: "請先登入",
         variant: "destructive"
-      })
+      });
       return;
     }
-    if (!contentType) return;
+    
+    if (contentType === "vocabFolder"){
+      try {
+        await deleteFolder(documentId);
+        onDeleteSuccess?.();
+        toast({
+          title: "成功刪除！",
+          variant: "default"
+        });
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        toast({
+          title: "刪除失敗",
+          description: "無法刪除內容",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+
     try {
-      setIsDeleting(true)
-      const contentRef = collection(db, 'content', userId, contentType)
-      await deleteDoc(doc(contentRef, documentId))
-      setIsDeleteDialogOpen(false)
-      onDeleteSuccess?.()
+      const contentRef = collection(db, 'content', userId, contentType);
+      await deleteDoc(doc(contentRef, documentId));
+      
+      onDeleteSuccess?.();
       toast({
         title: "成功刪除！",
         variant: "default"
-      })
+      });
     } catch (error) {
-      console.error('Error deleting document:', error)
-    } finally {
-      setIsDeleting(false)
+      console.error('Error deleting document:', error);
+      toast({
+        title: "刪除失敗",
+        description: "無法刪除內容",
+        variant: "destructive"
+      });
     }
-  }
+  };
+
+  const openDeleteDialog = () => {
+    openDialog(handleDelete);
+  };
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreVertical className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-6 w-6">
+            <MoreVertical className="h-2 w-2" />
             <span className="sr-only">開啟選單</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             className="text-destructive focus:text-destructive dark:text-red-500"
-            onClick={() => setIsDeleteDialogOpen(true)}
+            onClick={openDeleteDialog}
           >
             <Trash className="mr-2 h-4 w-4" />
             刪除
@@ -84,32 +114,17 @@ export function ContentActionDropdown({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="rounded-xl">
-          <DialogHeader>
-            <DialogTitle>刪除{contentType === "articles" ? "網頁" : "歌詞"}</DialogTitle>
-            <DialogDescription>
-              您確定要刪除這個{contentType === "articles" ? "網頁" : "歌詞"}嗎？此操作無法撤銷。
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-              disabled={isDeleting}
-            >
-              取消
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "刪除中..." : "刪除"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        isLoading={isDeleting}
+        onOpenChange={closeDialog}
+        onConfirm={handleConfirm}
+        title={`刪除${contentTypeToText[contentType]}`}
+        description={`您確定要刪除這個${contentTypeToText[contentType]}嗎？此操作無法撤銷。`}
+        confirmText="刪除"
+        cancelText="取消"
+        variant="destructive"
+      />
     </>
-  )
+  );
 }

@@ -14,11 +14,12 @@ export default function ListLayout({
   return (
     <TabLayout
       tabOptions={[
-        { value: 'articles', label: '網頁' },
+        { value: 'articles', label: '文章' },
         { value: 'lyrics', label: '歌詞' },
       ]}
       initialTab={pathname?.split('/')[2] || 'lyrics'}
       prefix='list'
+      onTabChange={(e) => localStorage.setItem('lastVisitedListTab', e)}
     >
       {children}
     </TabLayout>

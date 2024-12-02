@@ -45,6 +45,8 @@ export default function LyricsPage() {
         ...doc.data(),
       })) as Lyrics[];
 
+      lyricsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
       setLyrics(lyricsList);
     } catch (error) {
       console.error("Error fetching lyrics:", error);
