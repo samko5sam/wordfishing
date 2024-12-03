@@ -87,7 +87,7 @@ export default function VocabEditPage({ params }: PageProps) {
   }, [])
 
   return (
-    <div className="flex-1 h-full overflow-y-auto pb-24">
+    <div className="flex-1 h-full overflow-y-auto pb-48">
       <div className="py-4 pl-4">
         <SidebarTrigger className="p-4" />
       </div>
