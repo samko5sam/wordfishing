@@ -4,14 +4,14 @@ import { db } from '../lib/firebase';
 import { useAuth } from '@clerk/clerk-react';
 import { useRouter } from 'next/navigation';
 
-interface Folder {
+export interface Folder {
   folderName: string;
   id: string;
   createdAt: string;
   marked: boolean;
 }
 
-interface Vocabulary {
+export interface Vocabulary {
   folderId?: string;
   title: string;
   description: string;
@@ -140,12 +140,12 @@ export const useAddVocabulary = () => {
   return {addVocab}
 }
 
-export const useVocabulariesInFolder = (folderId: string) => {
+export const useVocabulariesInFolder = () => {
   const [allVocabularies, setAllVocabularies] = useState<Vocabulary[]>([]);
   const [isVocabLoading, setIsVocabLoading] = useState(false);
   const { userId } = useAuth();
 
-  const fetchAllVocabularies = async () => {
+  const fetchAllVocabularies = async (folderId: string) => {
     if (!userId) return;
     setIsVocabLoading(true);
     const folderRef = doc(db, 'vocabularies', userId, 'folders', folderId);
@@ -166,11 +166,6 @@ export const useVocabulariesInFolder = (folderId: string) => {
     setAllVocabularies(vocabularies);
     setIsVocabLoading(false);
   };
-
-  useEffect(() => {
-    fetchAllVocabularies();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
 
   return { allVocabularies, fetchAllVocabularies, isVocabLoading };
 };
