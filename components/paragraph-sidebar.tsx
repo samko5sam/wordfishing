@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { useTranslate } from "@/hooks/use-translate";
 import { AvailableFolderSelector } from "./AvailableFolderSelector";
 import { useAddVocabulary } from "@/hooks/use-vocabularies";
+import { useToast } from "@/hooks/use-toast";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [textToTranslate, setTextToTranslate] = React.useState('');
   const { translatedText, translate, translationLoading } = useTranslate();
   const { addVocab } = useAddVocabulary()
   const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const { toast } = useToast();
 
   const handleTranslate = async () => {
     if (textToTranslate.trim() === '') return;
@@ -23,11 +25,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleAddVocab = async () => {
     if (!textToTranslate) return;
     if (!selectedFolder) return;
-    await addVocab({
-      folderId: selectedFolder,
-      title: textToTranslate,
-      description: translatedText
-    })
+    try {
+      await addVocab({
+        folderId: selectedFolder,
+        title: textToTranslate,
+        description: translatedText
+      })
+      toast({
+        title: "已成功新增單字",
+        variant: "default"
+      })
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
