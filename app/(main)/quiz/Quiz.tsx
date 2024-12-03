@@ -217,7 +217,7 @@ const QuizApp = () => {
                   ) : (
                     <div>
                       <p className='text-xl mb-4'>考試結束！你的分數是 {score} 分（總分 {numQuestions}）</p>
-                      <Button className='w-full' onClick={handleResetQuiz}>重新考試</Button>
+                      <Button className='w-full' onClick={handleResetQuiz} variant="destructive">重新考試</Button>
                     </div>
                   )}
                 </div>
