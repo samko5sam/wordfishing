@@ -1,8 +1,11 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { useAvailableFolders, useVocabulariesInFolder, Folder, Vocabulary } from '../../../hooks/use-vocabularies';
-import { FullPageLoadingIndicator } from '../../../components/layout/FullPageLoadingIndicator';
-import { Button } from '../../../components/ui/button';
+import { useAvailableFolders, useVocabulariesInFolder, Folder, Vocabulary } from '@/hooks/use-vocabularies';
+import { FullPageLoadingIndicator } from '@/components/layout/FullPageLoadingIndicator';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { AvailableFolderSelector } from '@/components/AvailableFolderSelector';
+import { Label } from '@/components/ui/label';
 
 interface VocabularyWithTitle extends Vocabulary {
   title: string;
@@ -11,7 +14,7 @@ interface VocabularyWithTitle extends Vocabulary {
 
 const QuizApp = () => {
   const { availableFolders, isFolderLoading } = useAvailableFolders();
-  const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
   const { allVocabularies, isVocabLoading, fetchAllVocabularies } = useVocabulariesInFolder();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -20,7 +23,6 @@ const QuizApp = () => {
   const [numQuestions, setNumQuestions] = useState(5);
   const [answers, setAnswers] = useState<string[]>([]);
   const [quizStarted, setQuizStarted] = useState(false);
-  const [initialNumQuestions, setInitialNumQuestions] = useState(5);
   const [quizVocabularies, setQuizVocabularies] = useState<VocabularyWithTitle[]>([]);
 
   const generateAnswers = () => {
@@ -38,26 +40,29 @@ const QuizApp = () => {
     setShowAnswer(false);
     setSelectedAnswer('');
     setQuizStarted(false);
-    setInitialNumQuestions(5);
+    setNumQuestions(5);
     setQuizVocabularies([]);
     const fetchVocab = async () => {
       if (!selectedFolder) return;
-      await fetchAllVocabularies(selectedFolder?.id || "");
+      await fetchAllVocabularies(selectedFolder);
     };
     fetchVocab();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFolder]);
 
   useEffect(() => {
     if (quizStarted && allVocabularies.length > 0) {
+      setNumQuestions(allVocabularies.length || 1);
       const shuffledVocab = shuffleArray([...allVocabularies]);
-      setQuizVocabularies(shuffledVocab.slice(0, initialNumQuestions));
+      setQuizVocabularies(shuffledVocab.slice(0, numQuestions));
     }
-  }, [allVocabularies, quizStarted, initialNumQuestions]);
+  }, [allVocabularies, quizStarted, numQuestions]);
 
   useEffect(() => {
     if (quizStarted) {
       setAnswers(generateAnswers());
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizVocabularies, quizStarted, currentQuestion]);
 
 
@@ -70,7 +75,7 @@ const QuizApp = () => {
   };
 
   const handleNextQuestion = () => {
-    setCurrentQuestion((prev) => Math.min(prev + 1, initialNumQuestions - 1));
+    setCurrentQuestion((prev) => Math.min(prev + 1, numQuestions - 1));
     setShowAnswer(false);
     setSelectedAnswer('');
     setAnswers(generateAnswers());
@@ -121,44 +126,57 @@ const QuizApp = () => {
   }
 
   return (
-    <div>
-      <h1>Vocabulary Quiz</h1>
-      <select
-        value={selectedFolder?.id || ''}
-        onChange={(e) => {
-          const selectedFolderId = e.target.value;
-          const selectedFolder = availableFolders.find((folder: Folder) => folder.id === selectedFolderId);
-          setSelectedFolder(selectedFolder || null);
-        }}
-        disabled={quizStarted} // Disable folder selection when quiz is started
-      >
-        <option value="">Select a folder</option>
-        {availableFolders.map((folder: Folder) => (
-          <option key={folder.id} value={folder.id}>
-            {folder.folderName}
-          </option>
-        ))}
-      </select>
-      {selectedFolder && allVocabularies.length > 0 && (
+    <div className='w-[375px] max-w-full gap-y-4 flex flex-col'>
+      {!quizStarted && <>
+        <h1 className='text-xl'>單字考試</h1>
+        <AvailableFolderSelector selectedFolder={selectedFolder} setSelectedFolder={setSelectedFolder} />
+        {/* <select
+          value={selectedFolder?.id || ''}
+          onChange={(e) => {
+            const selectedFolderId = e.target.value;
+            const selectedFolder = availableFolders.find((folder: Folder) => folder.id === selectedFolderId);
+            setSelectedFolder(selectedFolder || null);
+          }}
+          disabled={quizStarted} // Disable folder selection when quiz is started
+        >
+          <option value="">請選擇資料夾</option>
+          {availableFolders.map((folder: Folder) => (
+            <option key={folder.id} value={folder.id}>
+              {folder.folderName}
+            </option>
+          ))}
+        </select> */}
+      </>}
+      {selectedFolder && allVocabularies.length < 4 && (
         <>
-          <label htmlFor="numQuestions">Number of Questions:</label>
-          <input
-            type="number"
-            id="numQuestions"
-            min="1"
-            max={allVocabularies.length}
-            value={initialNumQuestions}
-            onChange={(e) => setInitialNumQuestions(parseInt(e.target.value, 10))}
-            disabled={quizStarted}
-          />
-          {!quizStarted && <Button onClick={handleStartQuiz}>Start Quiz</Button>}
+          <div className="flex flex-col items-center justify-center h-full">
+            <h1 className="text-xl font-semibold text-gray-500">此資料夾的單字數量不足</h1>
+            <p className="text-gray-400 mt-2">資料夾中單字數量需高於4個！</p>
+          </div>
+        </>
+      )}
+      {selectedFolder && allVocabularies.length > 3 && (
+        <>
+          {!quizStarted && <>
+            <Label htmlFor="numQuestions">問題數量</Label>
+            <Input
+              type="number"
+              id="numQuestions"
+              min="1"
+              max={allVocabularies.length}
+              value={numQuestions}
+              onChange={(e) => setNumQuestions(parseInt(e.target.value, 10))}
+              disabled={quizStarted}
+            />
+            <Button onClick={handleStartQuiz}>開始考試</Button>
+          </>}
           {quizStarted && (
             <div>
-              <h2>{quizVocabularies[currentQuestion]?.title || ''}</h2>
+              <h2 className='text-xl p-2'>{quizVocabularies[currentQuestion]?.title || ''}</h2>
               {!showAnswer && (
-                <div>
+                <div className='flex flex-col gap-y-4'>
                   {answers.map((answer, index) => (
-                    <Button key={index} onClick={() => handleAnswerClick(answer)}>
+                    <Button variant="outline" key={index} onClick={() => handleAnswerClick(answer)}>
                       {answer}
                     </Button>
                   ))}
@@ -166,19 +184,19 @@ const QuizApp = () => {
               )}
               {showAnswer && (
                 <div>
-                  <p>Correct answer: {quizVocabularies[currentQuestion].description}</p>
-                  <p>Your answer: {selectedAnswer}</p>
-                  {currentQuestion < initialNumQuestions - 1 ? (
+                  <p>正確答案: {quizVocabularies[currentQuestion].description}</p>
+                  <p>你的回答: {selectedAnswer}</p>
+                  {currentQuestion < numQuestions - 1 ? (
                     <Button onClick={handleNextQuestion}>Next</Button>
                   ) : (
                     <div>
-                      <p>Quiz Finished! Your score is {score} out of {initialNumQuestions}</p>
-                      <Button onClick={handleResetQuiz}>Restart Quiz</Button>
+                      <p>考試結束！你的分數是 {score} 分（總分{numQuestions}）</p>
+                      <Button onClick={handleResetQuiz}>重新考試</Button>
                     </div>
                   )}
                 </div>
               )}
-              <Button onClick={handleResetQuiz}>Reset Quiz</Button>
+              {/* <Button onClick={handleResetQuiz}>重設考試</Button> */}
             </div>
           )}
         </>

@@ -5,8 +5,7 @@ export default function Layout({children}:{children: React.ReactNode}) {
   return (
     <SidebarProvider className="overflow-auto">  
       <AppSidebar side="right" variant="sidebar" className='pt-[48px]'/>
-      
       <main>{children}</main>
-      </SidebarProvider>
+    </SidebarProvider>
   )
 }
