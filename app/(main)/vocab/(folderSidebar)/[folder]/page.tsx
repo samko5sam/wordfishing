@@ -56,6 +56,14 @@ export default function FolderPage({ params }: PageProps) {
     }
   };
 
+  const handleEditVocabularies = () => {
+    router.push(`/vocab/${folder}/edit`);
+  };
+
+  const handleQuiz = () => {
+    router.push(`/quiz?folder=${folder}`);
+  };
+
   if (folderLoading) {
     return <FullPageLoadingIndicator />
   }
@@ -83,7 +91,13 @@ export default function FolderPage({ params }: PageProps) {
       </div>
       <div className='flex flex-row justify-center px-8'>
         <div className='max-w-3xl flex-1'>
-          <h1 className="text-3xl font-bold mb-8">{folderData?.folderName}</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">{folderData?.folderName}</h1>
+            <div className="space-x-2">
+              <Button onClick={handleQuiz} variant="default" disabled={allVocabularies.length < 4}>測驗{allVocabularies.length < 4 && allVocabularies.length > 0 && "（單字不夠）"}</Button>
+              <Button onClick={handleEditVocabularies} variant="outline">編輯</Button>
+            </div>
+          </div>
           <div className='flex flex-col gap-y-4'>
             {allVocabularies.map((vocab) => (
               <VocabListItem 
