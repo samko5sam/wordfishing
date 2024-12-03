@@ -28,7 +28,7 @@ export default function FolderPage({ params }: PageProps) {
   const { folder } = use(params)
   const { folderData, folderLoading, fetchFolder } = useVocabFolder();
 
-  const {allVocabularies, isVocabLoading, fetchAllVocabularies} = useVocabulariesInFolder(folder);
+  const {allVocabularies, isVocabLoading, fetchAllVocabularies} = useVocabulariesInFolder();
 
   useEffect(() => {
     if (!userId) {
@@ -36,6 +36,7 @@ export default function FolderPage({ params }: PageProps) {
       return
     }
     fetchFolder(folder);
+    fetchAllVocabularies(folder);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, folder])
 
@@ -49,7 +50,7 @@ export default function FolderPage({ params }: PageProps) {
       });
       
       // Refresh the vocabulary list
-      await fetchAllVocabularies();
+      await fetchAllVocabularies(folder);
     } catch (error) {
       console.error('Error toggling marked status:', error);
     }

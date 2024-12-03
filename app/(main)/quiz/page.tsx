@@ -1,4 +1,4 @@
-import QuizApp from './QuizApp';
+import QuizApp from './Quiz';
 import Link from 'next/link';
 
 export default function Quiz() {
