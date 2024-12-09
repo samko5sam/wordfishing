@@ -216,7 +216,7 @@ const QuizApp = () => {
                     <Button className='w-full' onClick={handleNextQuestion}>下一題</Button>
                   ) : (
                     <div>
-                      <p className='text-xl mb-4'>考試結束！你的分數是 {score} 分（總分 {numQuestions}）</p>
+                      <p className='text-xl mb-4'>考試結束！你的分數是 {score} / {numQuestions}分</p>
                       <Button className='w-full' onClick={handleResetQuiz} variant="destructive">重新考試</Button>
                     </div>
                   )}
