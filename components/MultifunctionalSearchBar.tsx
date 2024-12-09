@@ -96,8 +96,9 @@ export default function MultifunctionalSearchBar() {
     if (isValidUrl(inputValue)) {
       console.log("URL: " + inputValue); // Open URL
       router.push(`/import/article?url=${inputValue}`)
-    } else if (inputValue.length > 100) {
-      alert("Long text detected. Performing a long text analysis.");
+    }
+     else if (inputValue.length > 100) {
+      router.push("http://localhost:3000/list/text");
       // Add custom action for long text
     } else if (selectedIndex !== -1) {
       const suggestion = suggestions[selectedIndex];
