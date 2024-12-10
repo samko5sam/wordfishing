@@ -44,6 +44,8 @@ export default function TextsPage() { // Updated component name
         ...doc.data(),
       })) as Text[]; // Updated variable name and type
 
+      textsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
       setTexts(textsList);
     } catch (error) {
       console.error("Error fetching texts:", error); // Updated log message
