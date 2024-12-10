@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AvailableFolderSelector } from '@/components/AvailableFolderSelector';
 import { Label } from '@/components/ui/label';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2 } from 'lucide-react';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
@@ -17,25 +17,44 @@ interface VocabularyWithTitle extends Vocabulary {
 }
 
 const QuizApp = () => {
+  const [isAnswersLoading, setIsAnswersLoading] = useState(false);
   const { toast } = useToast();
-  const { availableFolders, isFolderLoading } = useAvailableFolders();
+  const { isFolderLoading } = useAvailableFolders();
   const [selectedFolder, setSelectedFolder] = useState<string>("");
-  const { allVocabularies, isVocabLoading, fetchAllVocabularies } = useVocabulariesInFolder();
+  const { allVocabularies, fetchAllVocabularies } = useVocabulariesInFolder();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState('');
+  const [questionText, setQuestionText] = useState('');
+  const [correctAnswer, setCorrectAnswer] = useState('');
   const [numQuestions, setNumQuestions] = useState(5);
   const [answers, setAnswers] = useState<string[]>([]);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizVocabularies, setQuizVocabularies] = useState<VocabularyWithTitle[]>([]);
-  const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [quizMode, setQuizMode] = useState('front');
+  const [quizSide, setQuizSide] = useState<'front'|'back'>('front');
+  const handleQuizSideChange = (side: 'front' | 'back' | 'random') => {
+    setQuizMode(side);
+  }
 
   const generateAnswers = () => {
     if (quizVocabularies.length === 0) return [];
+    setIsAnswersLoading(true);
 
-    const correctAnswer = quizVocabularies[currentQuestion].description;
+    if (quizMode === "random"){
+      setQuizSide(Math.random() < 0.5 ? "front" : "back")
+    } else {
+      setQuizSide(quizMode === "front" ? "front" : "back");
+    }
+
+    const correctAnswer = quizSide === "back" ? quizVocabularies[currentQuestion].title : quizVocabularies[currentQuestion].description;
+    const questionText = quizSide === "back" ? quizVocabularies[currentQuestion].description : quizVocabularies[currentQuestion].title;
+
+    setCorrectAnswer(correctAnswer);
+    setQuestionText(questionText);
     const incorrectAnswers = generateIncorrectAnswers();
     const allAnswers = [correctAnswer, ...incorrectAnswers];
     return shuffleArray(allAnswers);
@@ -77,6 +96,7 @@ const QuizApp = () => {
   useEffect(() => {
     if (quizStarted) {
       setAnswers(generateAnswers());
+      setIsAnswersLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizVocabularies, quizStarted, currentQuestion]);
@@ -85,7 +105,7 @@ const QuizApp = () => {
   const handleAnswerClick = (answer: string) => {
     setSelectedAnswer(answer);
     setShowAnswer(true);
-    if (answer === quizVocabularies[currentQuestion].description) {
+    if (answer === correctAnswer) {
       setScore((score) => score + 1);
     }
   };
@@ -129,10 +149,10 @@ const QuizApp = () => {
     if (allVocabularies.length < 4) {
       return ["Incorrect Answer 1", "Incorrect Answer 2", "Incorrect Answer 3"];
     }
-
+    const correctAnswer = quizSide === "back" ? quizVocabularies[currentQuestion].title : quizVocabularies[currentQuestion].description;
     const incorrectAnswers: string[] = [];
-    const correctAnswer = quizVocabularies[currentQuestion].description;
-    const availableWords = allVocabularies.map((vocab: VocabularyWithTitle) => vocab.description).filter((word: string) => word !== correctAnswer);
+    const answers = quizSide === "back"? "title" : "description";
+    const availableWords = allVocabularies.map((vocab: VocabularyWithTitle) => vocab[answers]).filter((word: string) => word !== correctAnswer);
 
     const shuffledWords = shuffleArray(availableWords);
     incorrectAnswers.push(...shuffledWords.slice(0, 3));
@@ -175,40 +195,66 @@ const QuizApp = () => {
               onChange={(e) => setNumQuestions(parseInt(e.target.value, 10))}
               disabled={quizStarted}
             />
-            <Button onClick={handleStartQuiz}>開始考試</Button>
+
+            <Label>複習模式</Label>
+            <div className="flex justify-center gap-4 w-full">
+              <Button
+                variant={quizMode === 'front' ? 'outline' : 'ghost'}
+                onClick={() => handleQuizSideChange('front')}
+                className='w-full'
+              >
+                正面
+              </Button>
+              <Button
+                variant={quizMode === 'back' ? 'outline' : 'ghost'}
+                onClick={() => handleQuizSideChange('back')}
+                className='w-full'
+              >
+                背面
+              </Button>
+              <Button
+                variant={quizMode === 'random' ? 'outline' : 'ghost'}
+                onClick={() => handleQuizSideChange('random')}
+                className='w-full'
+              >
+                單字隨機
+              </Button>
+            </div>
+            <Button variant="default" onClick={handleStartQuiz}>開始考試</Button>
           </>}
           {quizStarted && (
             <div>
-              <h2 className='text-xl px-2 py-4'>{quizVocabularies[currentQuestion]?.title || ''}</h2>
+              {!isAnswersLoading ? <>
+              <h2 className='text-xl px-2 py-4'>{questionText || ''}</h2>
               <div className='flex flex-col gap-y-4'>
                 {answers.map((answer, index) => (
-                  <Button variant={answer === quizVocabularies[currentQuestion].description && showAnswer ? "default" : showAnswer && selectedAnswer === answer ? "destructive" : "outline"} key={index} onClick={() => {
+                  <Button variant={answer === correctAnswer && showAnswer ? "default" : showAnswer && selectedAnswer === answer ? "destructive" : "outline"} key={index} onClick={() => {
                     if (showAnswer) return;
                     handleAnswerClick(answer)
                   }}>
                     {answer}
                   </Button>
                 ))}
-              </div>
+              </div></> : <QuestionPlaceholder />}
               {showAnswer && (
                 <div>
                   <div className='w-full flex flex-row justify-center py-4'>
-                    {selectedAnswer === quizVocabularies[currentQuestion].description && 
+                    {selectedAnswer === correctAnswer && 
                       <span className="text-green-500">
                         <CheckCircle2 width={48} height={48} />
                         答對了！
                       </span>
                     }
-                    {selectedAnswer !== quizVocabularies[currentQuestion].description && 
+                    {selectedAnswer !== correctAnswer && 
                       <span className="text-red-500">
                         <CrossCircledIcon width={48} height={48} />
                         答錯囉！
                       </span>
                     }
                   </div>
-                  {selectedAnswer !== quizVocabularies[currentQuestion].description &&
+                  {selectedAnswer !== correctAnswer &&
                     <div className='bg-gray-100 p-4 rounded-md mb-4'>
-                      <p>正確答案： {quizVocabularies[currentQuestion].description}</p>
+                      <p>正確答案： {correctAnswer}</p>
                       <p>你的回答： {selectedAnswer}</p>
                     </div>
                   }
@@ -229,5 +275,21 @@ const QuizApp = () => {
     </div>
   );
 };
+
+const QuestionPlaceholder = () => {
+  const answers = ['...','...','...','...']
+  return (
+    <>
+      <h2 className='text-xl px-2 py-4'>{'...'}</h2>
+      <div className='flex flex-col gap-y-4'>
+        {answers.map((answer, index) => (
+          <Button variant="outline" key={index}>
+            {answer}
+          </Button>
+        ))}
+      </div>
+    </>
+  )
+}
 
 export default QuizApp;
