@@ -1,11 +1,19 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { db } from "@/lib/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ImportTextPage() {
-  const [content, setContent] = useState("");
-  const [title, setTitle] = useState("");
+  const { userId } = useAuth();
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [importing, setImporting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -19,33 +27,80 @@ export default function ImportTextPage() {
     }
   }, [router]);
 
-  const handleImport = () => {
-    if (!title.trim()) {
-      alert("請輸入標題！");
+
+  const handleImport = async () => {
+    if (!userId) {
+      setError("請先登入");
+      return;
+    }
+    if (!title.trim() || !content.trim()) {
+      setError("標題和內容不能為空！");
       return;
     }
 
-    // 保存到 localStorage
-    const importedTexts = JSON.parse(localStorage.getItem("importedTexts") || "[]");
-    const newText = { title, content, id: Date.now() };
-    localStorage.setItem("importedTexts", JSON.stringify([...importedTexts, newText]));
+    setImporting(true);
+    setError(null);
 
-    alert("匯入成功！");
-    router.push("/list/text");
+    try {
+      const docId = `${userId}-${Date.now()}`;
+      const textData = {
+        title: title.trim(),
+        content: content.trim(),
+        userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const userTextsRef = collection(db, "content", userId, "text");
+      const textDocRef = doc(userTextsRef, docId);
+
+      await setDoc(textDocRef, textData);
+
+      setTitle("");
+      setContent("");
+      alert("匯入成功！");
+    } catch (err) {
+      console.error("匯入文字內容時發生錯誤：", err);
+      setError("匯入失敗，請稍後重試");
+    } finally {
+      setImporting(false);
+    }
   };
 
   return (
-    <div>
-      <h1>輸入標題並匯入</h1>
-      <textarea value={content} readOnly rows={10} cols={50} />
-      <div>
-        <input
-          type="text"
-          placeholder="輸入標題"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <button onClick={handleImport}>匯入</button>
+    <div className="h-screen flex flex-col justify-center items-center">
+      <div className="w-full max-w-md p-4">
+        <h1 className="text-2xl font-semibold mb-4">匯入文字內容</h1>
+
+        <div className="mb-4">
+          <label className="block mb-1 text-sm font-medium">標題</label>
+          <Input
+            type="text"
+            placeholder="輸入標題..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-1 text-sm font-medium">內容</label>
+          <Textarea
+            placeholder="輸入文字內容..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={10}
+          />
+        </div>
+
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        <Button
+          className="w-full"
+          onClick={handleImport}
+          disabled={importing}
+        >
+          {importing ? "正在匯入..." : "匯入文字內容"}
+        </Button>
       </div>
     </div>
   );

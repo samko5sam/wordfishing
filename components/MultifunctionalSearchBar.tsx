@@ -97,7 +97,7 @@ export default function MultifunctionalSearchBar() {
       console.log("URL: " + inputValue); // Open URL
       router.push(`/import/article?url=${inputValue}`)
     }
-     else  if (inputValue.length > 100) {
+     else if (inputValue.length > 100) {
       sessionStorage.setItem("importedContent", inputValue);
       router.push("/import/text");
       // Add custom action for long text
