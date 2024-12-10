@@ -16,7 +16,7 @@ import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { useVocabFolder } from "@/hooks/use-vocabularies";
 
 interface ContentActionDropdownProps {
-  contentType: 'articles' | 'lyrics' | 'vocabFolder';
+  contentType: 'articles' | 'lyrics' | 'vocabFolder' | 'text';
   documentId: string;
   onDeleteSuccess?: () => void;
 }
@@ -40,7 +40,8 @@ export function ContentActionDropdown({
   const contentTypeToText = {
     'articles': "文章",
     'lyrics': "歌詞",
-    'vocabFolder': "資料夾"
+    'vocabFolder': "資料夾",
+    'text': '手動匯入文章'
   }
 
   const handleDelete = async () => {

@@ -73,11 +73,11 @@ export default function TextsPage() { // Updated component name
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-48">
       {texts.map((text) => ( // Updated iteration variable
         <ContentCard
           key={text.id}
-          contentType="articles" // Updated content type
+          contentType="text" // Updated content type
           id={text.id}
           title={text.title}
           content={text.content}

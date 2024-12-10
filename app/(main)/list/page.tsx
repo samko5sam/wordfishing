@@ -12,8 +12,10 @@ export default function ListPage() {
     if (lastVisitedTab === 'lyrics') {
       // Redirect to /list/lyrics
       router.replace('/list/lyrics');
-    } else {
+    } else if (lastVisitedTab === 'text') {
       // Redirect to /list/articles by default
+      router.replace('/list/text');
+    } else {
       router.replace('/list/articles');
     }
   }, [router]);

@@ -5,7 +5,7 @@ import { ContentActionDropdown } from "./ContentActionDropdown";
 
 interface ContentCardProps {
   title: string;
-  contentType: "articles" | "lyrics";
+  contentType: "articles" | "lyrics" | "text";
   id: string;
   createdAt: string;
   content: string;
@@ -23,15 +23,23 @@ const ContentCard: React.FC<ContentCardProps> = ({
   artist,
   onDeleteSuccess
 }) => {
+  const redirectUrl = () => {
+    switch (contentType) {
+      case "articles":
+        return `/docs/article/${id}`
+      case "text":
+        return `/docs/text/${id}`
+      case "lyrics":
+        return `/docs/lyrics/${artist}/${title}`;
+      default:
+        return '';
+    }
+  }
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="p-4">
         <Link
-          href={
-            contentType === "articles"
-              ? `/docs/article/${id}`
-              : `/docs/lyrics/${artist}/${title}`
-          }
+          href={redirectUrl()}
         >
           <h3 className="font-semibold mb-2 line-clamp-2">{title}</h3>
           {!!artist && (

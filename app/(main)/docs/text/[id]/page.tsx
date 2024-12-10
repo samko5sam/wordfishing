@@ -73,7 +73,6 @@ export default function ArticleViewPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <BackToHomeBtn />
       <h1 className="text-2xl font-semibold">{article?.title}</h1>
       <div className="text-sm text-gray-500">
         更新於: {new Date(article?.updatedAt || "").toLocaleDateString()}

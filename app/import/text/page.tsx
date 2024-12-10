@@ -7,6 +7,8 @@ import { collection, doc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { createId } from "@paralleldrive/cuid2";
 
 export default function ImportTextPage() {
   const { userId } = useAuth();
@@ -15,17 +17,22 @@ export default function ImportTextPage() {
   const [importing, setImporting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const {toast} = useToast();
 
   useEffect(() => {
     // 從 sessionStorage 讀取輸入的內容
     const importedContent = sessionStorage.getItem("importedContent");
-    if (importedContent) {
+    if (importedContent !== null) {
       setContent(importedContent);
+      sessionStorage.removeItem("importedContent");
     } else {
-      alert("未檢測到需要匯入的文字！");
-      router.push("/");
+      if (!toast) return;
+      toast({
+        title: "未檢測到需要匯入的文字！"
+      });
     }
-  }, [router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   const handleImport = async () => {
@@ -42,7 +49,8 @@ export default function ImportTextPage() {
     setError(null);
 
     try {
-      const docId = `${userId}-${Date.now()}`;
+      const docId = createId();
+      const redirectUrl = `/docs/text/${docId}`;
       const textData = {
         title: title.trim(),
         content: content.trim(),
@@ -58,7 +66,10 @@ export default function ImportTextPage() {
 
       setTitle("");
       setContent("");
-      alert("匯入成功！");
+      toast({
+        title: "匯入成功！"
+      });
+      router.replace(redirectUrl)
     } catch (err) {
       console.error("匯入文字內容時發生錯誤：", err);
       setError("匯入失敗，請稍後重試");
