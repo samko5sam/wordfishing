@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { TTSButton } from "@/components/ui/TTSButton";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { Star, StarOff } from "lucide-react";
 
@@ -16,6 +17,7 @@ type VocabListItemProps = {
 function VocabListItem({ vocab, toggleMarked }: VocabListItemProps) {
   return (
     <div className="flex items-center rounded-xl border bg-card text-card-foreground shadow px-4 py-4">
+      <TTSButton lang="en" text={vocab.title} />
       <div className="flex-1">
         <strong>{vocab.title}</strong>
       </div>
