@@ -3,28 +3,27 @@
 
 import { useEffect, useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { useAuth, useClerk } from "@clerk/nextjs";
 import { db } from "@/lib/firebase";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import ContentCard from "@/components/ContentCard";
 import { useFirebaseAuthStatus } from "@/components/FirebaseAuthProvider";
 import { FullPageLoadingIndicator } from "@/components/layout/FullPageLoadingIndicator";
 
-interface Lyrics {
+interface Text {
   id: string;
-  artist: string;
   title: string;
   content: string;
   createdAt: string;
 }
 
-export default function LyricsPage() {
+export default function TextsPage() { // Updated component name
   const { userId } = useAuth();
   const { isAuthenticated } = useFirebaseAuthStatus();
   const clerk = useClerk();
-  const [lyrics, setLyrics] = useState<Lyrics[]>([]);
+  const [texts, setTexts] = useState<Text[]>([]); // Updated variable name
   const [loading, setLoading] = useState(true);
 
-  const fetchLyrics = async () => {
+  const fetchTexts = async () => { // Updated function name
     if (!userId) {
       console.log("請先登入");
       clerk.redirectToSignIn();
@@ -35,56 +34,56 @@ export default function LyricsPage() {
       return;
     }
 
-    const userContentRef = collection(db, "content", userId, "lyrics");
+    const userContentRef = collection(db, "content", userId, "text"); // Updated Firestore path
     const q = query(userContentRef, where("userId", "==", userId));
 
     try {
       const querySnapshot = await getDocs(q);
-      const lyricsList = querySnapshot.docs.map((doc) => ({
+      const textsList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      })) as Lyrics[];
+      })) as Text[]; // Updated variable name and type
 
-      lyricsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      textsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-      setLyrics(lyricsList);
+      setTexts(textsList);
     } catch (error) {
-      console.error("Error fetching lyrics:", error);
+      console.error("Error fetching texts:", error); // Updated log message
     } finally {
       setLoading(false);
     }
   };
-  
+
   const onDeleteSuccess = () => {
-    fetchLyrics();
+    fetchTexts(); // Updated function call
   };
+  
   useEffect(() => {
-    fetchLyrics();
+    fetchTexts(); // Updated function call
   }, [clerk, userId, isAuthenticated]);
 
   if (loading || !isAuthenticated) {
     return <FullPageLoadingIndicator />;
   }
 
-  if (lyrics.length === 0) {
+  if (texts.length === 0) { // Updated condition
     return (
       <div className="text-center py-10">
-        <p className="text-gray-500">未找到歌詞，匯入歌詞以開始！</p>
+        <p className="text-gray-500">未找到文字內容，匯入文字以開始！</p> {/* Updated message */}
       </div>
     );
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-48">
-      {lyrics.map((lyric) => (
+      {texts.map((text) => ( // Updated iteration variable
         <ContentCard
-          key={lyric.id}
-          contentType="lyrics"
-          id={lyric.id}
-          title={lyric.title}
-          artist={lyric.artist}
-          content={lyric.content}
-          createdAt={lyric.createdAt}
+          key={text.id}
+          contentType="text" // Updated content type
+          id={text.id}
+          title={text.title}
+          content={text.content}
+          createdAt={text.createdAt}
           onDeleteSuccess={onDeleteSuccess}
         />
       ))}
