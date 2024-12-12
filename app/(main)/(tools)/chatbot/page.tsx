@@ -50,15 +50,6 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const lastSelectedProvider = window.localStorage.getItem(
-      "lastSelectedAiProvider"
-    );
-    if (lastSelectedProvider) {
-      setSelectedProvider(lastSelectedProvider);
-    }
-  }, []);
-
-  useEffect(() => {
     const loadedKeys: ApiKeys = {};
     AI_PROVIDERS.forEach((provider) => {
       const key = localStorage.getItem(`${provider.id}_api_key`);
@@ -300,6 +291,12 @@ export default function ChatbotPage() {
           throw new Error(data.error?.message || "Failed to get response");
         }
       }
+      // Delete the text from other page
+              
+      const initialTextForChatbot = sessionStorage.getItem("wordfishingInitialTextForChatbot");
+      if (initialTextForChatbot){
+        sessionStorage.removeItem("wordfishingInitialTextForChatbot");
+      }
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
@@ -317,6 +314,20 @@ export default function ChatbotPage() {
     }
   };
 
+  useEffect(() => {
+    const lastSelectedProvider = window.localStorage.getItem(
+      "lastSelectedAiProvider"
+    );
+    if (lastSelectedProvider) {
+      setSelectedProvider(lastSelectedProvider);
+    }
+    const initialTextForChatbot = sessionStorage.getItem("wordfishingInitialTextForChatbot");
+    if (initialTextForChatbot){
+      setInputMessage(initialTextForChatbot + "\n\n請說明一下這段文字");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <h1 className="text-2xl font-bold mb-6">AI 學習助手</h1>
