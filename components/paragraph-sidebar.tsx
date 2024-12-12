@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="p-5">
         <Textarea
-          placeholder="Type stuff to translate here"
+          placeholder="在此輸入要翻譯的內容"
           id="message"
           rows={10}
           value={textToTranslate}
@@ -57,18 +57,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {translationLoading ? '翻譯中...' : '翻譯'}
         </Button>
         
-        <Card>
-          <CardContent className="p-5">
-          <p>{translationLoading ? '翻譯中...' :""}</p>
-          {translatedText && (
-            <p>{translatedText}</p>
-          )}
-          </CardContent>
-        </Card>
+        {translatedText && (
+          <Card>
+            <CardContent className="p-5">
+              <p>{translationLoading ? '翻譯中...' :""}</p>
+              <p>{translatedText}</p>
+            </CardContent>
+          </Card>
+        )}
 
+        <br />
         <AvailableFolderSelector selectedFolder={selectedFolder} setSelectedFolder={setSelectedFolder} />
 
-        <Button variant="default" onClick={handleAddVocab}>加入單字庫</Button>
+        <Button variant="default" onClick={handleAddVocab} disabled={!selectedFolder}>將翻譯加入單字庫</Button>
       </SidebarContent>
       <SidebarFooter></SidebarFooter>
       <SidebarRail />

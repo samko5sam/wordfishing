@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useTranslate } from "@/hooks/use-translate";
+import { TRANSLATE_TEXT_LIMIT } from "@/constants/Constraint";
+import { TranslationMessage } from "@/components/ui/TranslationMessage";
 
 const TranslateTestPage = () => {
   const [text, setText] = useState("");
@@ -19,9 +21,15 @@ const TranslateTestPage = () => {
   const [targetLanguage, setTargetLanguage] = useState("zh-Hant");
   const [languages, setLanguages] = useState<string[]>([]);
   const {translate, translatedText, translationLoading} = useTranslate();
+  const [showTranslation, setShowTranslation] = useState(true);
 
   const handleTranslate = () => {
-    translate(text, targetLanguage, sourceLanguage === "detect" ? undefined : sourceLanguage);
+    if (text.length <= TRANSLATE_TEXT_LIMIT){
+      translate(text, targetLanguage, sourceLanguage === "detect" ? undefined : sourceLanguage);
+      setShowTranslation(true);
+    } else {
+      setShowTranslation(false);
+    }
   }
 
   const handleSourceLanguageChange = (language: string) => {
@@ -118,8 +126,10 @@ const TranslateTestPage = () => {
         >
           翻譯
         </Button>
-        <div className=" overflow-y-auto">
-          {translationLoading ? <div><Loader2 className="animate-spin" /></div> : <p style={{wordBreak: "break-word"}}>{translatedText}</p>}
+        <div className={translationLoading ? "overflow-hidden" : "overflow-y-auto"}>
+          {translationLoading ? <div><Loader2 className="animate-spin" /></div> : <>{
+            showTranslation ? <p style={{wordBreak: "break-word"}}>{translatedText}</p> : <TranslationMessage />
+          }</>}
         </div>
       </Card>
     </div>
