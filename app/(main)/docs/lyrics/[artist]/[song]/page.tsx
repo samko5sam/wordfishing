@@ -8,6 +8,7 @@ import { use } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { FullPageLoadingIndicator } from '@/components/layout/FullPageLoadingIndicator'
+import { SidebarTriggerForDocs } from '../../../SidebarTriggerForDocs'
 
 interface PageProps {
   params: Promise<{
@@ -88,6 +89,7 @@ export default function LyricsPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <SidebarTriggerForDocs />
       <h1 className="text-3xl font-bold mb-2">{lyrics.title}</h1>
       <h2 className="text-xl text-gray-600 dark:text-gray-400 mb-6">{lyrics.artist}</h2>
       
