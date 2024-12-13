@@ -28,7 +28,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/samko5sam/wordfishing">
-    <img src="public/wordfishing-logo-rounded.jpg" alt="Logo" width="80" height="80">
+    <img src="public/wordfishing-logo-rounded.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Wordfishing 一語多吃</h3>
