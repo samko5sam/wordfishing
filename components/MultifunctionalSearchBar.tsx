@@ -31,6 +31,7 @@ export default function MultifunctionalSearchBar() {
   const suggestionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const searchbarRef = useRef<HTMLDivElement>(null);
 
+  const TEXTINPUT_THRESHOLD = 100;
   // Determine the icon and action based on the input type
   const updateIconAndAction = (value: string) => {
     setInputValue(value);
@@ -38,7 +39,7 @@ export default function MultifunctionalSearchBar() {
     if (isValidUrl(value)) {
       setInputTypeInfer("link");
       setIcon(<Link />);
-    } else if (value.length > 50) {
+    } else if (value.length > TEXTINPUT_THRESHOLD) {
       setInputTypeInfer("text");
       setIcon(<TextCursorInput />);
     } else {
@@ -97,7 +98,7 @@ export default function MultifunctionalSearchBar() {
       console.log("URL: " + inputValue); // Open URL
       router.push(`/import/article?url=${inputValue}`)
     }
-     else if (inputValue.length > 100) {
+     else if (inputValue.length > TEXTINPUT_THRESHOLD) {
       sessionStorage.setItem("importedContent", inputValue);
       router.push("/import/text");
       // Add custom action for long text
