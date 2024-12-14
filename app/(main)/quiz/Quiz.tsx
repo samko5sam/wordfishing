@@ -50,8 +50,8 @@ const QuizApp = () => {
       setQuizSide(quizMode === "front" ? "front" : "back");
     }
 
-    const correctAnswer = quizSide === "back" ? quizVocabularies[currentQuestion].title : quizVocabularies[currentQuestion].description;
-    const questionText = quizSide === "back" ? quizVocabularies[currentQuestion].description : quizVocabularies[currentQuestion].title;
+    const correctAnswer = quizSide === "back" ? quizVocabularies[currentIndex].title : quizVocabularies[currentIndex].description;
+    const questionText = quizSide === "back" ? quizVocabularies[currentIndex].description : quizVocabularies[currentIndex].title;
 
     setCorrectAnswer(correctAnswer);
     setQuestionText(questionText);
@@ -59,6 +59,8 @@ const QuizApp = () => {
     const allAnswers = [correctAnswer, ...incorrectAnswers];
     return shuffleArray(allAnswers);
   };
+
+  const currentIndex = currentQuestion % quizVocabularies.length;
 
   useEffect(() => {
     setScore(0);
@@ -149,7 +151,7 @@ const QuizApp = () => {
     if (allVocabularies.length < 4) {
       return ["Incorrect Answer 1", "Incorrect Answer 2", "Incorrect Answer 3"];
     }
-    const correctAnswer = quizSide === "back" ? quizVocabularies[currentQuestion].title : quizVocabularies[currentQuestion].description;
+    const correctAnswer = quizSide === "back" ? quizVocabularies[currentIndex].title : quizVocabularies[currentIndex].description;
     const incorrectAnswers: string[] = [];
     const answers = quizSide === "back"? "title" : "description";
     const availableWords = allVocabularies.map((vocab: VocabularyWithTitle) => vocab[answers]).filter((word: string) => word !== correctAnswer);
